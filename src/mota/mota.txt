@@ -1,1 +1,147 @@
-Hello World 123456
+Trong project backend này, tôi đã kết nối với database xong, công việc tiếp theo là tạo cho tôi 1 thư mục module, trong thư mục module này hãy xây dựng các file thực thể .model.ts ( ví dụ user.module.ts ) phù hợp với database được cấu hình như sau:
+Table users {
+  id integer [pk, increment]
+  email varchar [not null]
+  username varchar [not null]
+  password varchar [not null]
+  phone varchar
+  gender varchar [not null]
+  avatar varchar 
+  isActive boll [default: true]
+  roleId integer [not null, ref : > roles.id]
+  addressId integer [not null, ref: > address.id]
+}
+Table roles {
+  id integer [pk, increment]
+  name varchar [not null]
+  isActive bool [default: true]
+}
+Table address {
+  id integer [pk, increment]
+  label varchar [not null]
+  province varchar [not null]
+  district varchar [not null]
+  ward varchar [not null]
+  street varchar [not null]
+  latitude float [not null]
+  longitude float [not null]
+  isDefault bool [default: false]
+  isActive bool [default: true]
+}
+Table restaurants {
+  id integer [pk, increment]
+  name varchar [not null]
+  imageUrl varchar
+  phone varchar
+  openTime time
+  closeTime time
+  rating integer
+  status integer
+  categorieID integer [not null, ref : > categories.id]
+  userId integer [not null, ref : > users.id]
+  addressId integer [not null, ref: > address.id]
+  isActive bool [default: true]
+}
+Table categories {
+  id integer [pk, increment]
+  name varchar [not null]
+  isActive bool [default: true]
+}
+Table products {
+  id integer [pk, increment]
+  name varchar [not null]
+  description text
+  price integer [not null]
+  imageUrl varchar
+  available boolean [default: true]
+  
+  categorieId integer [not null, ref: > categories.id]
+  restaurantID integer [not null, ref: > restaurants.id]
+  isActive bool [default: true]
+}
+
+Table revenue_reports {
+  id integer [pk, increment]
+  month integer [not null]
+  year integer [not null]
+  totalOrders integer 
+  totalRevenue integer
+  isActive bool [default: true]
+
+  restaurantId integer [not null, ref : > restaurants.id]
+}
+
+Table discounts {
+  id integer [pk, increment]
+  code varchar [not null]
+  description varchar
+  percent float
+  minOrderVale integer
+  quantity integer [not null]
+  startTime timestamp
+  endTime timestamp
+  status varchar
+  isActive bool [default: true]
+}
+Table orders {
+  id integer [pk, increment]
+  totalPrice integer [not null]
+  status integer [not null]
+  shippingFee integer [not null]
+  isActive bool [default: true]
+
+  userId integer [not null, ref : > users.id]
+  restaurantId integer [not null, ref: > restaurants.id]
+  addressId integer [not null, ref: > address.id]
+  discountId integer [not null, ref: > discounts.id]
+}
+Table order_details {
+  id integer [pk, increment]
+  quantity integer [not null]
+  note text
+  isActive bool [default:true]
+
+  productId integer [not null, ref : > products.id]
+  orderId integer [not null, ref: > orders.id]
+}
+Table payments {
+  id integer [pk, increment]
+  paymentMethod varchar [not null]
+  status integer [not null]
+  isActive bool [default:true]
+
+  orderId integer [not null, ref : > orders.id]
+}
+Table feedbacks {
+  id integer [pk, increment]
+  rating integer [not null]
+  content varchar [not null]
+  imageUrl varchar [not null]
+  isActive bool [default: true]
+
+  orderId integer [not null, ref : > orders.id]
+}
+
+Table responses {
+  id integer [pk, increment]
+  sellId integer [not null, ref : > users.id]
+  reviewId integer [not null, ref : > users.id]
+  adminId integer [not null, ref: > users.id]
+  content text
+  imageUrl varchar
+  response text
+  isActive bool [default: true]
+}
+
+Table notifications {
+  id integer [pk,increment]
+  content text [not null]
+  type integer [not null]
+  isRead bool
+  isActive bool [default: true]
+
+  receivedId integer [not null, ref : > users.id]
+  orderId integer [not null, ref: > orders.id]
+}
+Tiếp theo ứng với mỗi model sẽ xây dựng các module cho chúng, tôi cần mỗi thực thể sẽ có các api liên quan đến get, get all, get by id, create, update
+
