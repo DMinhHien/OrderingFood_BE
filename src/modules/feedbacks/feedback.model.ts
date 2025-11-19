@@ -1,0 +1,66 @@
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  PrimaryKey,
+  AutoIncrement,
+  CreatedAt,
+  UpdatedAt,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
+import { Order } from '../orders/order.model';
+
+@Table({
+  tableName: 'feedbacks',
+  timestamps: true,
+})
+export class Feedback extends Model<Feedback> {
+  @PrimaryKey
+  @AutoIncrement
+  @Column({
+    type: DataType.INTEGER,
+  })
+  declare id: number;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  rating: number;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  content: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  imageUrl: string;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    defaultValue: true,
+  })
+  isActive: boolean;
+
+  @ForeignKey(() => Order)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  orderId: number;
+
+  @BelongsTo(() => Order)
+  order: Order;
+
+  @CreatedAt
+  declare createdAt: Date;
+
+  @UpdatedAt
+  declare updatedAt: Date;
+}
