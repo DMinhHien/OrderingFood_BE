@@ -86,12 +86,12 @@ export class User extends Model<User> {
   @ForeignKey(() => Address)
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true,
   })
-  addressId: number;
+  addressId: number | null;
 
   @BelongsTo(() => Address)
-  address: Address;
+  address: Address | null;
 
   @CreatedAt
   declare createdAt: Date;

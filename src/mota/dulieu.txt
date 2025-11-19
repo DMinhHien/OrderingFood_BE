@@ -24,10 +24,11 @@ INSERT INTO categories (id, name, "isActive", "createdAt", "updatedAt") VALUES
 ON CONFLICT DO NOTHING;
 
 -- 4) users (depends on roles, address)
+-- addressId kept but NULL (ensure column allows NULL)
 INSERT INTO users (id, email, username, password, phone, gender, avatar, "isActive", "roleId", "addressId", "createdAt", "updatedAt") VALUES
-	(1, 'admin@example.com', 'admin', '$2b$10$examplehashadmin', '0900000001', 'male', NULL, true, 1, 1, NOW(), NOW()),
-	(2, 'seller@example.com', 'seller01', '$2b$10$examplehashseller', '0900000002', 'female', NULL, true, 2, 2, NOW(), NOW()),
-	(3, 'customer@example.com', 'customer01', '$2b$10$examplehashcustomer', '0900000003', 'male', NULL, true, 3, 1, NOW(), NOW())
+	(1, 'admin@example.com', 'admin', '$2b$10$examplehashadmin', '0900000001', 'male', NULL, true, 1, NULL, NOW(), NOW()),
+	(2, 'seller@example.com', 'seller01', '$2b$10$examplehashseller', '0900000002', 'female', NULL, true, 2, NULL, NOW(), NOW()),
+	(3, 'customer@example.com', 'customer01', '$2b$10$examplehashcustomer', '0900000003', 'male', NULL, true, 3, NULL, NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 -- 5) restaurants (depends on category, user, address)

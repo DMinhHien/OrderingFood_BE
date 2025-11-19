@@ -1,14 +1,17 @@
-import { ConfigService } from "@nestjs/config"
-import { SequelizeModuleOptions } from "@nestjs/sequelize"
-import Sequelize, { Dialect } from "sequelize/lib/sequelize"
+import { ConfigService } from '@nestjs/config';
+import { SequelizeModuleOptions } from '@nestjs/sequelize';
+import Sequelize, { Dialect } from 'sequelize/lib/sequelize';
 
-export const sequelizeConfig = (configService: ConfigService): SequelizeModuleOptions => ({
-          database: configService.get<string>('DB_NAME'),
-          host: configService.get<string>('DB_HOST'),
-          port: configService.get<number>('DB_PORT') || 5432,
-          username: configService.get<string>('DB_USERNAME'),
-          password: configService.get<string>('DB_PASSWORD'),
-          dialect: configService.get<string>('DB_DIALECT') as Dialect,
-          autoLoadModels: true,
-          synchronize: true,
-})
+export const sequelizeConfig = (
+  configService: ConfigService,
+): SequelizeModuleOptions => ({
+  database: configService.get<string>('DB_NAME'),
+  host: configService.get<string>('DB_HOST'),
+  port: configService.get<number>('DB_PORT') || 5432,
+  username: configService.get<string>('DB_USERNAME'),
+  password: configService.get<string>('DB_PASSWORD'),
+  dialect: configService.get<string>('DB_DIALECT') as Dialect,
+  autoLoadModels: true,
+  synchronize: true,
+  sync: { alter: true },
+});

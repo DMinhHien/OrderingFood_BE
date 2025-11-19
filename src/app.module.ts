@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule, SequelizeModuleOptions } from '@nestjs/sequelize';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { sequelizeConfig } from './config/sequelize.config';
+import { DatabaseSyncService } from './config/database-sync.service';
+import { User } from './modules/users/user.model';
 import { RoleModule } from './modules/roles/role.module';
 import { CategoryModule } from './modules/categories/category.module';
 import { AddressModule } from './modules/addresses/address.module';
@@ -25,10 +27,13 @@ import { RevenueReportModule } from './modules/revenue-reports/revenue-report.mo
       useFactory: (configService: ConfigService): SequelizeModuleOptions =>
         sequelizeConfig(configService),
     }),
+    // Import User model vào AppModule để DatabaseSyncService có thể inject
+    SequelizeModule.forFeature([User]),
+    // Import UserModule trước để User model được register
+    UserModule,
     RoleModule,
     CategoryModule,
     AddressModule,
-    UserModule,
     RestaurantModule,
     ProductModule,
     DiscountModule,
@@ -40,5 +45,6 @@ import { RevenueReportModule } from './modules/revenue-reports/revenue-report.mo
     NotificationModule,
     RevenueReportModule,
   ],
+  providers: [DatabaseSyncService],
 })
 export class AppModule {}

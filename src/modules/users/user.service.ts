@@ -34,14 +34,26 @@ export class UserService {
   async findAll(): Promise<User[]> {
     return this.userModel.findAll({
       where: { isActive: true },
-      include: ['role', 'address'],
+      include: [
+        'role',
+        {
+          association: 'address',
+          required: false,
+        },
+      ],
     });
   }
 
   async findOne(id: number): Promise<User> {
     const user = await this.userModel.findOne({
       where: { id, isActive: true },
-      include: ['role', 'address'],
+      include: [
+        'role',
+        {
+          association: 'address',
+          required: false,
+        },
+      ],
     });
 
     if (!user) {
