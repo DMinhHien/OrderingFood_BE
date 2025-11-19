@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
 import { User } from './user.model';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -27,6 +28,7 @@ export class UserService {
 
     return this.userModel.create({
       ...createUserDto,
+      addressId: createUserDto.addressId ?? null,
       isActive: createUserDto.isActive ?? true,
     } as any);
   }
@@ -66,10 +68,13 @@ export class UserService {
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 
-    // Check if email is being updated and if it already exists
+    // Check if email is being updated and if it already exists (exclude current user)
     if (updateUserDto.email && updateUserDto.email !== user.email) {
       const existingUser = await this.userModel.findOne({
-        where: { email: updateUserDto.email },
+        where: {
+          email: updateUserDto.email,
+          id: { [Op.ne]: id },
+        },
       });
 
       if (existingUser) {
