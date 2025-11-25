@@ -1,92 +1,216 @@
--- Sample seed data for PostgreSQL (DBeaver)
--- Project: OrderingFood_BE
--- Note: Uses explicit IDs for FK consistency; adjust as needed.
+==============================
+Sample request bodies cho Swagger
+==============================
 
-BEGIN;
+1) Roles
+--------
+POST /roles
+{
+  "name": "MANAGER",
+  "isActive": true
+}
 
--- 1) roles
-INSERT INTO roles (id, name, "isActive", "createdAt", "updatedAt") VALUES
-	(1, 'ADMIN', true, NOW(), NOW()),
-	(2, 'SELLER', true, NOW(), NOW()),
-	(3, 'CUSTOMER', true, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+2) Addresses
+------------
+POST /addresses
+{
+  "label": "Nhà riêng",
+  "province": "Hà Nội",
+  "district": "Cầu Giấy",
+  "ward": "Dịch Vọng",
+  "street": "15 Ngõ 115",
+  "latitude": 21.0285,
+  "longitude": 105.8048,
+  "isDefault": true
+}
 
--- 2) address
-INSERT INTO address (id, label, province, district, ward, street, latitude, longitude, "isDefault", "isActive", "createdAt", "updatedAt") VALUES
-	(1, 'Home', 'Hanoi', 'Cau Giay', 'Dich Vong', '123 X Street', 21.028511, 105.804817, true, true, NOW(), NOW()),
-	(2, 'Office', 'Hanoi', 'Ba Dinh', 'Cong Vi', '456 Y Street', 21.035000, 105.814000, false, true, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+3) Restaurant Categories
+------------------------
+POST /restaurant-categories
+{
+  "name": "Đồ ăn nhanh",
+  "isActive": true
+}
 
--- 3) categories
-INSERT INTO categories (id, name, "isActive", "createdAt", "updatedAt") VALUES
-	(1, 'Burgers', true, NOW(), NOW()),
-	(2, 'Sushi', true, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+4) Product Categories
+---------------------
+POST /product-categories
+{
+  "name": "Burger",
+  "isActive": true
+}
 
--- 4) users (depends on roles, address)
--- addressId kept but NULL (ensure column allows NULL)
-INSERT INTO users (id, email, username, password, phone, gender, avatar, "isActive", "roleId", "addressId", "createdAt", "updatedAt") VALUES
-	(1, 'admin@example.com', 'admin', '$2b$10$examplehashadmin', '0900000001', 'male', NULL, true, 1, NULL, NOW(), NOW()),
-	(2, 'seller@example.com', 'seller01', '$2b$10$examplehashseller', '0900000002', 'female', NULL, true, 2, NULL, NOW(), NOW()),
-	(3, 'customer@example.com', 'customer01', '$2b$10$examplehashcustomer', '0900000003', 'male', NULL, true, 3, NULL, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+5) Users
+--------
+POST /users
+{
+  "email": "owner@demo.com",
+  "username": "owner_demo",
+  "password": "StrongPass!123",
+  "phone": "0907000001",
+  "gender": "male",
+  "avatar": "https://cdn.demo/avatar.png",
+  "roleId": 2,
+  "addressId": 1,
+  "isActive": true
+}
 
--- 5) restaurants (depends on category, user, address)
-INSERT INTO restaurants (id, name, "imageUrl", phone, "openTime", "closeTime", rating, status, "categorieID", "userId", "addressId", "isActive", "createdAt", "updatedAt") VALUES
-	(1, 'Hien Burger House', NULL, '0912345678', '08:00', '22:00', 5, 1, 1, 2, 2, true, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+6) Restaurants
+--------------
+POST /restaurants
+{
+  "name": "Demo Burger House",
+  "imageUrl": "https://cdn.demo/rest.png",
+  "phone": "0908000002",
+  "openTime": "08:00",
+  "closeTime": "22:00",
+  "rating": 5,
+  "status": 1,
+  "categorieRestaurantID": 1,
+  "userId": 2,
+  "addressId": 1,
+  "isActive": true
+}
 
--- 6) products (depends on category, restaurant)
-INSERT INTO products (id, name, description, price, "imageUrl", available, "categorieId", "restaurantID", "isActive", "createdAt", "updatedAt") VALUES
-	(1, 'Classic Burger', 'Beef patty with lettuce and tomato', 80000, NULL, true, 1, 1, true, NOW(), NOW()),
-	(2, 'Cheese Burger', 'Beef patty with cheddar cheese', 90000, NULL, true, 1, 1, true, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+7) Menus
+--------
+POST /menus
+{
+  "name": "Combo chính",
+  "restaurantID": 1,
+  "isActive": true
+}
 
--- 7) discounts
-INSERT INTO discounts (id, code, description, percent, "minOrderVale", quantity, "startTime", "endTime", status, "isActive", "createdAt", "updatedAt") VALUES
-	(1, 'WELCOME10', '10% off for first order', 10, 100000, 1000, NOW() - INTERVAL '7 days', NOW() + INTERVAL '30 days', 'ACTIVE', true, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+8) Discounts
+------------
+POST /discounts
+{
+  "code": "WELCOME15",
+  "description": "Giảm 15% cho đơn đầu tiên",
+  "percent": 15,
+  "minOrderVale": 150000,
+  "quantity": 100,
+  "startTime": "2025-11-01T00:00:00Z",
+  "endTime": "2025-12-31T23:59:59Z",
+  "status": "ACTIVE",
+  "isActive": true
+}
 
--- 8) orders (depends on user, restaurant, address, discount)
-INSERT INTO orders (id, "totalPrice", status, "shippingFee", "isActive", "userId", "restaurantId", "addressId", "discountId", "createdAt", "updatedAt") VALUES
-	(1, 170000, 1, 15000, true, 3, 1, 1, 1, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+9) Products
+-----------
+POST /products
+{
+  "name": "Mega Burger",
+  "description": "Bánh burger bò kép phô mai",
+  "price": 120000,
+  "imageUrl": "https://cdn.demo/mega.png",
+  "available": true,
+  "categorieProductId": 1,
+  "restaurantID": 1,
+  "menuID": 1,
+  "isActive": true
+}
 
--- 9) order_details (depends on order, product)
-INSERT INTO order_details (id, quantity, note, "isActive", "productId", "orderId", "createdAt", "updatedAt") VALUES
-	(1, 1, 'No onions', true, 1, 1, NOW(), NOW()),
-	(2, 1, NULL, true, 2, 1, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+10) Orders
+----------
+POST /orders
+{
+  "totalPrice": 150000,
+  "status": 1,
+  "shippingFee": 15000,
+  "userId": 3,
+  "restaurantId": 1,
+  "addressId": 1,
+  "discountId": 1,
+  "isActive": true
+}
 
--- 10) payments (depends on order)
-INSERT INTO payments (id, "paymentMethod", status, "isActive", "orderId", "createdAt", "updatedAt") VALUES
-	(1, 'CASH', 1, true, 1, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+11) Order Details
+-----------------
+POST /order-details
+{
+  "quantity": 2,
+  "note": "Thêm phô mai",
+  "productId": 1,
+  "orderId": 1,
+  "isActive": true
+}
 
--- 11) feedbacks (depends on order)
-INSERT INTO feedbacks (id, rating, content, "imageUrl", "isActive", "orderId", "createdAt", "updatedAt") VALUES
-	(1, 5, 'Very tasty burgers!', NULL, true, 1, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+12) Payments
+------------
+POST /payments
+{
+  "paymentMethod": "COD",
+  "status": 1,
+  "orderId": 1,
+  "isActive": true
+}
 
--- 12) notifications (depends on user as receiver, and order)
-INSERT INTO notifications (id, content, type, "isRead", "isActive", "receivedId", "orderId", "createdAt", "updatedAt") VALUES
-	(1, 'Your order has been received', 1, false, true, 3, 1, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+13) Feedbacks
+-------------
+POST /feedbacks
+{
+  "rating": 5,
+  "content": "Ngon và giao nhanh!",
+  "imageUrl": "https://cdn.demo/feedback.png",
+  "orderId": 1,
+  "isActive": true
+}
 
--- 13) responses (three users: seller, reviewer, admin)
-INSERT INTO responses (id, "sellId", "reviewId", "adminId", content, "imageUrl", response, "isActive", "createdAt", "updatedAt") VALUES
-	(1, 2, 3, 1, 'Seller response to review', NULL, 'Thanks for your feedback!', true, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+14) Responses
+-------------
+POST /responses
+{
+  "sellId": 2,
+  "reviewId": 3,
+  "adminId": 1,
+  "content": "Cảm ơn bạn đã đánh giá!",
+  "imageUrl": null,
+  "response": "Chúng tôi rất vui khi phục vụ bạn",
+  "isActive": true
+}
 
--- 14) revenue_reports (depends on restaurant)
-INSERT INTO revenue_reports (id, month, year, "totalOrders", "totalRevenue", "isActive", "restaurantId", "createdAt", "updatedAt") VALUES
-	(1, 11, 2025, 25, 3500000, true, 1, NOW(), NOW())
-ON CONFLICT DO NOTHING;
+15) Notifications
+-----------------
+POST /notifications
+{
+  "content": "Đơn hàng #1 đã được xác nhận",
+  "type": 1,
+  "isRead": false,
+  "receivedId": 3,
+  "orderId": 1,
+  "isActive": true
+}
 
-COMMIT;
+16) Revenue Reports
+-------------------
+POST /revenue-reports
+{
+  "month": 11,
+  "year": 2025,
+  "totalOrders": 45,
+  "totalRevenue": 5200000,
+  "restaurantId": 1,
+  "isActive": true
+}
 
--- How to run in DBeaver:
--- 1) Open an SQL Editor connected to your Postgres DB.
--- 2) Paste this file or run it directly; ensure search_path points to the correct schema if not public.
--- 3) Verify by SELECTing from each table.
+17) Carts
+---------
+POST /carts
+{
+  "userId": 3,
+  "status": "ACTIVE",
+  "isActive": true
+}
+
+18) Cart Items
+--------------
+POST /cart-items
+{
+  "cartId": 1,
+  "productId": 1,
+  "quantity": 2,
+  "unitPrice": 120000,
+  "isActive": true
+}
 

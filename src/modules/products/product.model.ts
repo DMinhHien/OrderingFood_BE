@@ -11,9 +11,11 @@ import {
   BelongsTo,
   HasMany,
 } from 'sequelize-typescript';
-import { Category } from '../categories/category.model';
+import { ProductCategory } from '../product-categories/product-category.model';
 import { Restaurant } from '../restaurants/restaurant.model';
 import { OrderDetail } from '../order-details/order-detail.model';
+import { Menu } from '../menus/menu.model';
+import { CartItem } from '../cart-items/cart-item.model';
 
 @Table({
   tableName: 'products',
@@ -57,15 +59,16 @@ export class Product extends Model<Product> {
   })
   available: boolean;
 
-  @ForeignKey(() => Category)
+  @ForeignKey(() => ProductCategory)
   @Column({
+    field: 'categorieId',
     type: DataType.INTEGER,
     allowNull: false,
   })
-  categorieId: number;
+  categorieProductId: number;
 
-  @BelongsTo(() => Category)
-  category: Category;
+  @BelongsTo(() => ProductCategory, { as: 'productCategory' })
+  productCategory: ProductCategory;
 
   @ForeignKey(() => Restaurant)
   @Column({
@@ -76,6 +79,16 @@ export class Product extends Model<Product> {
 
   @BelongsTo(() => Restaurant)
   restaurant: Restaurant;
+
+  @ForeignKey(() => Menu)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  menuID: number | null;
+
+  @BelongsTo(() => Menu)
+  menu: Menu | null;
 
   @Column({
     type: DataType.BOOLEAN,
@@ -91,4 +104,7 @@ export class Product extends Model<Product> {
 
   @HasMany(() => OrderDetail)
   orderDetails: OrderDetail[];
+
+  @HasMany(() => CartItem)
+  cartItems: CartItem[];
 }

@@ -47,13 +47,24 @@ export class DiscountService {
     updateDiscountDto: UpdateDiscountDto,
   ): Promise<Discount> {
     const discount = await this.findOne(id);
-    const updateData: any = { ...updateDiscountDto };
-    if (updateDiscountDto.startTime) {
-      updateData.startTime = new Date(updateDiscountDto.startTime);
+    const { startTime, endTime, ...rest } =
+      updateDiscountDto as UpdateDiscountDto & {
+        startTime?: string;
+        endTime?: string;
+      };
+
+    const updateData: Partial<Discount> = {
+      ...rest,
+    } as Partial<Discount>;
+
+    if (startTime) {
+      updateData.startTime = new Date(startTime);
     }
-    if (updateDiscountDto.endTime) {
-      updateData.endTime = new Date(updateDiscountDto.endTime);
+
+    if (endTime) {
+      updateData.endTime = new Date(endTime);
     }
+
     await discount.update(updateData);
     return discount.reload();
   }

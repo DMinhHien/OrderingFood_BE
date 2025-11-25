@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsInt,
   IsNotEmpty,
-  IsNumber,
 } from 'class-validator';
 
 export class CreateRestaurantDto {
@@ -38,7 +37,7 @@ export class CreateRestaurantDto {
 
   @IsInt()
   @IsNotEmpty()
-  categorieID: number;
+  categorieRestaurantID: number;
 
   @IsInt()
   @IsNotEmpty()

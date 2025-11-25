@@ -29,11 +29,15 @@ export class CreateProductDto {
 
   @IsInt()
   @IsNotEmpty()
-  categorieId: number;
+  categorieProductId: number;
 
   @IsInt()
   @IsNotEmpty()
   restaurantID: number;
+
+  @IsInt()
+  @IsOptional()
+  menuID?: number;
 
   @IsBoolean()
   @IsOptional()

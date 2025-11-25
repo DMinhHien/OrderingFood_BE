@@ -1,15 +1,15 @@
-Trong project backend này, tôi đã kết nối với database xong, công việc tiếp theo là tạo cho tôi 1 thư mục module, trong thư mục module này hãy xây dựng các file thực thể .model.ts ( ví dụ user.module.ts ) phù hợp với database được cấu hình như sau:
+Trong project backend này, tôi đã sửa lại database 1 chút
 Table users {
   id integer [pk, increment]
   email varchar [not null]
   username varchar [not null]
   password varchar [not null]
   phone varchar
-  gender varchar [not null]
+  gender varchar 
   avatar varchar 
-  isActive boll [default: true]
+  isActive bool [default: true]
   roleId integer [not null, ref : > roles.id]
-  addressId integer [not null, ref: > address.id]
+  addressId integer [ ref: > address.id]
 }
 Table roles {
   id integer [pk, increment]
@@ -37,15 +37,27 @@ Table restaurants {
   closeTime time
   rating integer
   status integer
-  categorieID integer [not null, ref : > categories.id]
+  categorieRestaurantID integer [not null, ref : > categories_restaurant.id]
   userId integer [not null, ref : > users.id]
   addressId integer [not null, ref: > address.id]
   isActive bool [default: true]
 }
-Table categories {
+Table categories_restaurant {
   id integer [pk, increment]
   name varchar [not null]
   isActive bool [default: true]
+}
+Table categories_product {
+  id integer [pk,increment]
+  name varchar [not null]
+  isActive bool [default: true]
+}
+Table menus {
+  id integer [pk,increment]
+  name varchar [not null]
+  isActive bool [default: true]
+
+  restaurantID integer [not null, ref : > restaurants.id]
 }
 Table products {
   id integer [pk, increment]
@@ -55,8 +67,9 @@ Table products {
   imageUrl varchar
   available boolean [default: true]
   
-  categorieId integer [not null, ref: > categories.id]
+  categorieProductId integer [not null, ref: > categories_product.id]
   restaurantID integer [not null, ref: > restaurants.id]
+  menuID integer [ref : > menus.id]
   isActive bool [default: true]
 }
 
@@ -143,5 +156,22 @@ Table notifications {
   receivedId integer [not null, ref : > users.id]
   orderId integer [not null, ref: > orders.id]
 }
-Tiếp theo ứng với mỗi model sẽ xây dựng các module cho chúng, tôi cần mỗi thực thể sẽ có các api liên quan đến get, get all, get by id, create, update
 
+Table carts {
+  id integer [pk, increment]
+  userId integer [not null, ref : > users.id]
+  status varchar [default: 'ACTIVE']
+  isActive bool [default: true]
+}
+
+Table cart_items {
+  id integer [pk, increment]
+  cartId integer [not null, ref : > carts.id]
+  productId integer [not null, ref : > products.id]
+  quantity integer [default: 1]
+  unitPrice integer [default: 0]
+  isActive bool [default: true]
+}
+
+Tiếp theo ứng với mỗi model, hãy cập nhật lại các module cho chúng, tôi cần mỗi thực thể sẽ có các api liên quan đến get, get all, get by id, create, update
+Model nào chưa có module thì tạo mới tương tự như các model khác

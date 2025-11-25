@@ -17,6 +17,7 @@ import { Restaurant } from '../restaurants/restaurant.model';
 import { Order } from '../orders/order.model';
 import { Response } from '../responses/response.model';
 import { Notification } from '../notifications/notification.model';
+import { Cart } from '../carts/cart.model';
 
 @Table({
   tableName: 'users',
@@ -116,4 +117,7 @@ export class User extends Model<User> {
 
   @HasMany(() => Notification)
   notifications: Notification[];
+
+  @HasMany(() => Cart)
+  carts: Cart[];
 }

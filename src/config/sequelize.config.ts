@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { SequelizeModuleOptions } from '@nestjs/sequelize';
-import Sequelize, { Dialect } from 'sequelize/lib/sequelize';
+import { Dialect } from 'sequelize/lib/sequelize';
 
 export const sequelizeConfig = (
   configService: ConfigService,
@@ -13,5 +13,8 @@ export const sequelizeConfig = (
   dialect: configService.get<string>('DB_DIALECT') as Dialect,
   autoLoadModels: true,
   synchronize: true,
-  sync: { alter: true },
+  sync:
+    configService.get<string>('DB_SYNC_ALTER') === 'true'
+      ? { alter: true }
+      : undefined,
 });

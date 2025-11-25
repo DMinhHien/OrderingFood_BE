@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '../modules/users/user.model';
 import { Sequelize } from 'sequelize-typescript';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DatabaseSyncService implements OnModuleInit {
@@ -10,6 +11,7 @@ export class DatabaseSyncService implements OnModuleInit {
   constructor(
     @InjectModel(User)
     private readonly userModel: typeof User,
+    private readonly configService: ConfigService,
   ) {}
 
   async onModuleInit() {
@@ -24,8 +26,10 @@ export class DatabaseSyncService implements OnModuleInit {
         return;
       }
 
-      // Sync User model với alter: true để cập nhật schema
-      await this.userModel.sync({ alter: true });
+      const shouldAlter =
+        this.configService.get<string>('DB_SYNC_ALTER') === 'true';
+
+      await this.userModel.sync(shouldAlter ? { alter: true } : undefined);
 
       this.logger.log('✅ Database synchronization completed successfully!');
       this.logger.log('✅ User model schema has been updated');

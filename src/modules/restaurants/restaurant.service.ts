@@ -21,14 +21,14 @@ export class RestaurantService {
   async findAll(): Promise<Restaurant[]> {
     return this.restaurantModel.findAll({
       where: { isActive: true },
-      include: ['category', 'user', 'address'],
+      include: ['restaurantCategory', 'user', 'address'],
     });
   }
 
   async findOne(id: number): Promise<Restaurant> {
     const restaurant = await this.restaurantModel.findOne({
       where: { id, isActive: true },
-      include: ['category', 'user', 'address'],
+      include: ['restaurantCategory', 'user', 'address'],
     });
 
     if (!restaurant) {

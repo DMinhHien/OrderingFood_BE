@@ -11,7 +11,7 @@ import {
   BelongsTo,
   HasMany,
 } from 'sequelize-typescript';
-import { Category } from '../categories/category.model';
+import { RestaurantCategory } from '../restaurant-categories/restaurant-category.model';
 import { User } from '../users/user.model';
 import { Address } from '../addresses/address.model';
 import { Product } from '../products/product.model';
@@ -72,15 +72,16 @@ export class Restaurant extends Model<Restaurant> {
   })
   status: number;
 
-  @ForeignKey(() => Category)
+  @ForeignKey(() => RestaurantCategory)
   @Column({
+    field: 'categorieID',
     type: DataType.INTEGER,
     allowNull: false,
   })
-  categorieID: number;
+  categorieRestaurantID: number;
 
-  @BelongsTo(() => Category)
-  category: Category;
+  @BelongsTo(() => RestaurantCategory, { as: 'restaurantCategory' })
+  restaurantCategory: RestaurantCategory;
 
   @ForeignKey(() => User)
   @Column({

@@ -26,7 +26,11 @@ async function bootstrap() {
     .addTag('users', 'User management endpoints')
     .addTag('roles', 'Role management endpoints')
     .addTag('addresses', 'Address management endpoints')
-    .addTag('categories', 'Category management endpoints')
+    .addTag('restaurant-categories', 'Restaurant category endpoints')
+    .addTag('product-categories', 'Product category endpoints')
+    .addTag('menus', 'Menu management endpoints')
+    .addTag('carts', 'Cart management endpoints')
+    .addTag('cart-items', 'Cart item management endpoints')
     .addTag('restaurants', 'Restaurant management endpoints')
     .addTag('products', 'Product management endpoints')
     .addTag('orders', 'Order management endpoints')
@@ -49,4 +53,4 @@ async function bootstrap() {
     `Swagger documentation available at http://localhost:${port}/api`,
   );
 }
-bootstrap();
+void bootstrap();

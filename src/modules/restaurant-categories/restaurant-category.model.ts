@@ -8,16 +8,14 @@ import {
   CreatedAt,
   UpdatedAt,
   HasMany,
-  ForeignKey,
 } from 'sequelize-typescript';
 import { Restaurant } from '../restaurants/restaurant.model';
-import { Product } from '../products/product.model';
 
 @Table({
-  tableName: 'categories',
+  tableName: 'categories_restaurant',
   timestamps: true,
 })
-export class Category extends Model<Category> {
+export class RestaurantCategory extends Model<RestaurantCategory> {
   @PrimaryKey
   @AutoIncrement
   @Column({
@@ -45,7 +43,4 @@ export class Category extends Model<Category> {
 
   @HasMany(() => Restaurant)
   restaurants: Restaurant[];
-
-  @HasMany(() => Product)
-  products: Product[];
 }
