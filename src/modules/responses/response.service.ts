@@ -21,14 +21,14 @@ export class ResponseService {
   async findAll(): Promise<Response[]> {
     return this.responseModel.findAll({
       where: { isActive: true },
-      include: ['seller', 'reviewer', 'admin'],
+      include: ['sender', 'feedback'],
     });
   }
 
   async findOne(id: number): Promise<Response> {
     const response = await this.responseModel.findOne({
       where: { id, isActive: true },
-      include: ['seller', 'reviewer', 'admin'],
+      include: ['sender', 'feedback'],
     });
 
     if (!response) {

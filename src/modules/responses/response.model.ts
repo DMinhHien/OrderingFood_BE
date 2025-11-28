@@ -11,6 +11,7 @@ import {
   BelongsTo,
 } from 'sequelize-typescript';
 import { User } from '../users/user.model';
+import { Feedback } from '../feedbacks/feedback.model';
 
 @Table({
   tableName: 'responses',
@@ -29,30 +30,21 @@ export class Response extends Model<Response> {
     type: DataType.INTEGER,
     allowNull: false,
   })
-  sellId: number;
+  sentId: number;
 
-  @BelongsTo(() => User, { as: 'seller', foreignKey: 'sellId' })
-  seller: User;
+  @BelongsTo(() => User, { as: 'sender', foreignKey: 'sentId' })
+  sender: User;
 
-  @ForeignKey(() => User)
+  @ForeignKey(() => Feedback)
   @Column({
+    field: 'feedbackID',
     type: DataType.INTEGER,
     allowNull: false,
   })
-  reviewId: number;
+  feedbackId: number;
 
-  @BelongsTo(() => User, { as: 'reviewer', foreignKey: 'reviewId' })
-  reviewer: User;
-
-  @ForeignKey(() => User)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  adminId: number;
-
-  @BelongsTo(() => User, { as: 'admin', foreignKey: 'adminId' })
-  admin: User;
+  @BelongsTo(() => Feedback, { as: 'feedback', foreignKey: 'feedbackId' })
+  feedback: Feedback;
 
   @Column({
     type: DataType.TEXT,

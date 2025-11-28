@@ -9,15 +9,11 @@ import {
 export class CreateResponseDto {
   @IsInt()
   @IsNotEmpty()
-  sellId: number;
+  sentId: number;
 
   @IsInt()
   @IsNotEmpty()
-  reviewId: number;
-
-  @IsInt()
-  @IsNotEmpty()
-  adminId: number;
+  feedbackId: number;
 
   @IsString()
   @IsOptional()
