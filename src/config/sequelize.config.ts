@@ -13,6 +13,7 @@ export const sequelizeConfig = (
   dialect: configService.get<string>('DB_DIALECT') as Dialect,
   autoLoadModels: true,
   synchronize: true,
+  logging: false, // Tắt logging SQL queries để tránh log lặp lại
   sync:
     configService.get<string>('DB_SYNC_ALTER') === 'true'
       ? { alter: true }
