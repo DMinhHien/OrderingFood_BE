@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -47,6 +48,46 @@ export class OrderController {
   })
   findAll() {
     return this.orderService.findAll();
+  }
+
+  @Get('user/:userId/orders')
+  @ApiOperation({ summary: 'Get orders by user' })
+  @ApiParam({ name: 'userId', type: Number, description: 'User ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of orders for the user',
+  })
+  findByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('status') status?: string,
+  ) {
+    const statusNumber = status ? parseInt(status, 10) : undefined;
+    return this.orderService.findByUser(
+      userId,
+      Number.isNaN(statusNumber) ? undefined : statusNumber,
+    );
+  }
+
+  @Get('restaurant/:restaurantId/orders')
+  @ApiOperation({ summary: 'Get orders by restaurant' })
+  @ApiParam({
+    name: 'restaurantId',
+    type: Number,
+    description: 'Restaurant ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of orders for the restaurant',
+  })
+  findByRestaurant(
+    @Param('restaurantId', ParseIntPipe) restaurantId: number,
+    @Query('status') status?: string,
+  ) {
+    const statusNumber = status ? parseInt(status, 10) : undefined;
+    return this.orderService.findByRestaurant(
+      restaurantId,
+      Number.isNaN(statusNumber) ? undefined : statusNumber,
+    );
   }
 
   @Get(':id')

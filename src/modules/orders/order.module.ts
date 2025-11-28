@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Order } from './order.model';
+import { Notification } from '../notifications/notification.model';
 import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { UserModule } from '../users/user.module';
@@ -10,7 +11,7 @@ import { DiscountModule } from '../discounts/discount.module';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Order]),
+    SequelizeModule.forFeature([Order, Notification]),
     UserModule,
     RestaurantModule,
     AddressModule,

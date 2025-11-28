@@ -51,6 +51,12 @@ export class Order extends Model<Order> {
   shippingFee: number;
 
   @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  note: string;
+
+  @Column({
     type: DataType.BOOLEAN,
     defaultValue: true,
   })
@@ -89,7 +95,7 @@ export class Order extends Model<Order> {
   @ForeignKey(() => Discount)
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true,
   })
   discountId: number;
 
