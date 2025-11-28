@@ -10,6 +10,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Restaurant } from '../restaurants/restaurant.model';
 import { Menu } from '../menus/menu.model';
 import { OrderDetail } from '../order-details/order-detail.model';
+import { CategoryProductMap } from '../category-product-maps/category-product-map.model';
 import { Op, QueryTypes } from 'sequelize';
 
 @Injectable()
@@ -23,6 +24,8 @@ export class ProductService {
     private readonly menuModel: typeof Menu,
     @InjectModel(OrderDetail)
     private readonly orderDetailModel: typeof OrderDetail,
+    @InjectModel(CategoryProductMap)
+    private categoryProductMapModel: typeof CategoryProductMap,
   ) {}
 
   private async ensureRestaurant(id: number): Promise<void> {
@@ -227,33 +230,60 @@ export class ProductService {
 
     // Nếu có categoryIds, chỉ lấy products có TẤT CẢ các category đã chọn
     if (categoryIds && categoryIds.length > 0) {
-      // Lấy tất cả products có ít nhất một category trong danh sách
-      const productsWithCategories = await this.productModel.findAll({
-        where,
+      // Bước 1: Tìm tất cả products có TẤT CẢ các category đã chọn
+      // Lấy tất cả category-product-maps với các categoryId đã chọn
+      const allMaps = await this.categoryProductMapModel.findAll({
+        where: {
+          categoryId: { [Op.in]: categoryIds },
+        },
+        attributes: ['productId', 'categoryId'],
+        raw: true,
+      });
+
+      // Nhóm theo productId để tìm products có TẤT CẢ các category
+      const productCategoryMap = new Map<number, Set<number>>();
+      (allMaps as any[]).forEach((map: any) => {
+        // Sequelize trả về tên field theo model (productId, categoryId) hoặc DB (productID, categoryID)
+        const productId = map.productId || map.productID;
+        const categoryId = map.categoryId || map.categoryID;
+        if (productId && categoryId) {
+          if (!productCategoryMap.has(productId)) {
+            productCategoryMap.set(productId, new Set<number>());
+          }
+          productCategoryMap.get(productId)!.add(categoryId);
+        }
+      });
+
+      // Filter để chỉ giữ products có TẤT CẢ các category đã chọn
+      const validProductIds: number[] = [];
+      productCategoryMap.forEach((productCategorySet, productId) => {
+        // Kiểm tra xem product có tất cả categoryIds không
+        const hasAllCategories = categoryIds.every((catId) =>
+          productCategorySet.has(catId),
+        );
+        if (hasAllCategories) {
+          validProductIds.push(productId);
+        }
+      });
+
+      if (validProductIds.length === 0) {
+        return []; // Không có product nào thỏa mãn
+      }
+
+      // Bước 2: Lấy tất cả products với các productIds hợp lệ
+      const filteredProducts = await this.productModel.findAll({
+        where: {
+          ...where,
+          id: { [Op.in]: validProductIds },
+        },
         include: [
           ...include,
           {
             association: 'categories',
-            where: { id: { [Op.in]: categoryIds } },
-            required: true,
+            required: false,
           },
         ],
       });
-
-      // Filter để chỉ giữ lại products có TẤT CẢ các category đã chọn
-      const filteredProducts: Product[] = [];
-      for (const product of productsWithCategories) {
-        const productCategoryIds = (product.categories || []).map(
-          (cat: any) => cat.id,
-        );
-        // Kiểm tra xem product có tất cả categoryIds không
-        const hasAllCategories = categoryIds.every((catId) =>
-          productCategoryIds.includes(catId),
-        );
-        if (hasAllCategories) {
-          filteredProducts.push(product);
-        }
-      }
 
       return filteredProducts;
     } else {
