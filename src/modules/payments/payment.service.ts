@@ -25,6 +25,13 @@ export class PaymentService {
     });
   }
 
+  async findByOrder(orderId: number): Promise<Payment[]> {
+    return this.paymentModel.findAll({
+      where: { orderId, isActive: true },
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
   async findOne(id: number): Promise<Payment> {
     const payment = await this.paymentModel.findOne({
       where: { id, isActive: true },
