@@ -49,6 +49,17 @@ export class NotificationController {
     return this.notificationService.findAll();
   }
 
+  @Get('receiver/:receivedId')
+  @ApiOperation({ summary: 'Get notifications by receiver' })
+  @ApiParam({ name: 'receivedId', type: Number, description: 'Receiver ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of notifications for the receiver',
+  })
+  findByReceiver(@Param('receivedId', ParseIntPipe) receivedId: number) {
+    return this.notificationService.findByReceiver(receivedId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a notification by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Notification ID' })
@@ -75,6 +86,17 @@ export class NotificationController {
     @Body() updateNotificationDto: UpdateNotificationDto,
   ) {
     return this.notificationService.update(id, updateNotificationDto);
+  }
+
+  @Patch(':id/read')
+  @ApiOperation({ summary: 'Mark a notification as read' })
+  @ApiParam({ name: 'id', type: Number, description: 'Notification ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification marked as read',
+  })
+  markAsRead(@Param('id', ParseIntPipe) id: number) {
+    return this.notificationService.markAsRead(id);
   }
 
   @Delete(':id')

@@ -25,9 +25,13 @@ export class CreateNotificationDto {
 
   @IsInt()
   @IsNotEmpty()
-  receivedId: number;
+  sentId: number;
 
   @IsInt()
   @IsNotEmpty()
-  orderId: number;
+  receivedId: number;
+
+  @IsInt()
+  @IsOptional()
+  orderId?: number;
 }

@@ -24,14 +24,31 @@ export class NotificationService {
   async findAll(): Promise<Notification[]> {
     return this.notificationModel.findAll({
       where: { isActive: true },
-      include: ['receiver', 'order'],
+      include: ['sender', 'receiver', 'order'],
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
+  async findByReceiver(receivedId: number): Promise<Notification[]> {
+    return this.notificationModel.findAll({
+      where: { isActive: true, receivedId },
+      include: [
+        {
+          association: 'sender',
+        },
+        {
+          association: 'order',
+          include: ['restaurant'],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
     });
   }
 
   async findOne(id: number): Promise<Notification> {
     const notification = await this.notificationModel.findOne({
       where: { id, isActive: true },
-      include: ['receiver', 'order'],
+      include: ['sender', 'receiver', 'order'],
     });
 
     if (!notification) {
@@ -47,6 +64,14 @@ export class NotificationService {
   ): Promise<Notification> {
     const notification = await this.findOne(id);
     await notification.update(updateNotificationDto);
+    return notification.reload();
+  }
+
+  async markAsRead(id: number): Promise<Notification> {
+    const notification = await this.findOne(id);
+    if (!notification.isRead) {
+      await notification.update({ isRead: true });
+    }
     return notification.reload();
   }
 

@@ -55,6 +55,16 @@ export class Notification extends Model<Notification> {
     type: DataType.INTEGER,
     allowNull: false,
   })
+  sentId: number;
+
+  @BelongsTo(() => User, { as: 'sender', foreignKey: 'sentId' })
+  sender: User;
+
+  @ForeignKey(() => User)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
   receivedId: number;
 
   @BelongsTo(() => User, { as: 'receiver', foreignKey: 'receivedId' })
@@ -63,9 +73,9 @@ export class Notification extends Model<Notification> {
   @ForeignKey(() => Order)
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true,
   })
-  orderId: number;
+  orderId: number | null;
 
   @BelongsTo(() => Order)
   order: Order;
