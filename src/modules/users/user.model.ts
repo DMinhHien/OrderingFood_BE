@@ -10,6 +10,7 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { Role } from '../roles/role.model';
 import { Address } from '../addresses/address.model';
@@ -18,6 +19,7 @@ import { Order } from '../orders/order.model';
 import { Response } from '../responses/response.model';
 import { Notification } from '../notifications/notification.model';
 import { Cart } from '../carts/cart.model';
+import { UserAddress } from '../user-addresses/user-address.model';
 
 @Table({
   tableName: 'users',
@@ -84,21 +86,14 @@ export class User extends Model<User> {
   @BelongsTo(() => Role)
   role: Role;
 
-  @ForeignKey(() => Address)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-  })
-  addressId: number | null;
-
-  @BelongsTo(() => Address)
-  address: Address | null;
-
   @CreatedAt
   declare createdAt: Date;
 
   @UpdatedAt
   declare updatedAt: Date;
+
+  @BelongsToMany(() => Address, () => UserAddress)
+  addresses: Address[];
 
   @HasMany(() => Restaurant)
   restaurants: Restaurant[];
@@ -106,17 +101,20 @@ export class User extends Model<User> {
   @HasMany(() => Order)
   orders: Order[];
 
-  @HasMany(() => Response, { as: 'sellerResponses', foreignKey: 'sellId' })
-  sellerResponses: Response[];
+  @HasMany(() => Response, { foreignKey: 'sentId' })
+  responses: Response[];
 
-  @HasMany(() => Response, { as: 'reviewerResponses', foreignKey: 'reviewId' })
-  reviewerResponses: Response[];
+  @HasMany(() => Notification, {
+    as: 'sentNotifications',
+    foreignKey: 'sentId',
+  })
+  sentNotifications: Notification[];
 
-  @HasMany(() => Response, { as: 'adminResponses', foreignKey: 'adminId' })
-  adminResponses: Response[];
-
-  @HasMany(() => Notification)
-  notifications: Notification[];
+  @HasMany(() => Notification, {
+    as: 'receivedNotifications',
+    foreignKey: 'receivedId',
+  })
+  receivedNotifications: Notification[];
 
   @HasMany(() => Cart)
   carts: Cart[];

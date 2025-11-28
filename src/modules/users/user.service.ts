@@ -28,7 +28,6 @@ export class UserService {
 
     return this.userModel.create({
       ...createUserDto,
-      addressId: createUserDto.addressId ?? null,
       isActive: createUserDto.isActive ?? true,
     } as any);
   }
@@ -39,7 +38,7 @@ export class UserService {
       include: [
         'role',
         {
-          association: 'address',
+          association: 'addresses',
           required: false,
         },
       ],
@@ -52,7 +51,7 @@ export class UserService {
       include: [
         'role',
         {
-          association: 'address',
+          association: 'addresses',
           required: false,
         },
       ],

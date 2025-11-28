@@ -39,8 +39,4 @@ export class CreateUserDto {
   @IsInt()
   @IsNotEmpty()
   roleId: number;
-
-  @IsInt()
-  @IsOptional()
-  addressId?: number | null;
 }
