@@ -8,8 +8,10 @@ import {
   CreatedAt,
   UpdatedAt,
   HasMany,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { Restaurant } from '../restaurants/restaurant.model';
+import { CategoryRestaurantMap } from '../category-restaurant-maps/category-restaurant-map.model';
 
 @Table({
   tableName: 'categories_restaurant',
@@ -41,6 +43,6 @@ export class RestaurantCategory extends Model<RestaurantCategory> {
   @UpdatedAt
   declare updatedAt: Date;
 
-  @HasMany(() => Restaurant)
+  @BelongsToMany(() => Restaurant, () => CategoryRestaurantMap)
   restaurants: Restaurant[];
 }
