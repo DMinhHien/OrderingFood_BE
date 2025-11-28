@@ -51,11 +51,19 @@ POST /users
   "gender": "male",
   "avatar": "https://cdn.demo/avatar.png",
   "roleId": 2,
+  "isActive": true
+}
+
+6) User Addresses
+-----------------
+POST /user-addresses
+{
+  "userId": 2,
   "addressId": 1,
   "isActive": true
 }
 
-6) Restaurants
+7) Restaurants
 --------------
 POST /restaurants
 {
@@ -66,13 +74,20 @@ POST /restaurants
   "closeTime": "22:00",
   "rating": 5,
   "status": 1,
-  "categorieRestaurantID": 1,
   "userId": 2,
   "addressId": 1,
   "isActive": true
 }
 
-7) Menus
+8) Restaurant-Category Mapping
+------------------------------
+POST /category-restaurant-maps
+{
+  "restaurantId": 1,
+  "categoryId": 1
+}
+
+9) Menus
 --------
 POST /menus
 {
@@ -81,14 +96,14 @@ POST /menus
   "isActive": true
 }
 
-8) Discounts
-------------
+10) Discounts
+-------------
 POST /discounts
 {
   "code": "WELCOME15",
   "description": "Giảm 15% cho đơn đầu tiên",
   "percent": 15,
-  "minOrderVale": 150000,
+  "minOrderValue": 150000,
   "quantity": 100,
   "startTime": "2025-11-01T00:00:00Z",
   "endTime": "2025-12-31T23:59:59Z",
@@ -96,8 +111,8 @@ POST /discounts
   "isActive": true
 }
 
-9) Products
------------
+11) Products
+------------
 POST /products
 {
   "name": "Mega Burger",
@@ -105,27 +120,34 @@ POST /products
   "price": 120000,
   "imageUrl": "https://cdn.demo/mega.png",
   "available": true,
-  "categorieProductId": 1,
   "restaurantID": 1,
   "menuID": 1,
   "isActive": true
 }
 
-10) Orders
+12) Product-Category Mapping
+----------------------------
+POST /category-product-maps
+{
+  "productId": 1,
+  "categoryId": 1
+}
+
+13) Orders
 ----------
 POST /orders
 {
   "totalPrice": 150000,
   "status": 1,
   "shippingFee": 15000,
+  "note": "Gọi trước khi giao",
   "userId": 3,
   "restaurantId": 1,
   "addressId": 1,
-  "discountId": 1,
-  "isActive": true
+  "discountId": 1
 }
 
-11) Order Details
+14) Order Details
 -----------------
 POST /order-details
 {
@@ -136,7 +158,7 @@ POST /order-details
   "isActive": true
 }
 
-12) Payments
+15) Payments
 ------------
 POST /payments
 {
@@ -146,43 +168,43 @@ POST /payments
   "isActive": true
 }
 
-13) Feedbacks
+16) Feedbacks
 -------------
 POST /feedbacks
 {
   "rating": 5,
   "content": "Ngon và giao nhanh!",
-  "imageUrl": "https://cdn.demo/feedback.png",
+  "imageUrl": null,
   "orderId": 1,
   "isActive": true
 }
 
-14) Responses
+17) Responses
 -------------
 POST /responses
 {
-  "sellId": 2,
-  "reviewId": 3,
-  "adminId": 1,
+  "sentId": 2,
+  "feedbackId": 1,
   "content": "Cảm ơn bạn đã đánh giá!",
   "imageUrl": null,
   "response": "Chúng tôi rất vui khi phục vụ bạn",
   "isActive": true
 }
 
-15) Notifications
+18) Notifications
 -----------------
 POST /notifications
 {
   "content": "Đơn hàng #1 đã được xác nhận",
   "type": 1,
   "isRead": false,
+  "sentId": 2,
   "receivedId": 3,
   "orderId": 1,
   "isActive": true
 }
 
-16) Revenue Reports
+19) Revenue Reports
 -------------------
 POST /revenue-reports
 {
@@ -194,7 +216,7 @@ POST /revenue-reports
   "isActive": true
 }
 
-17) Carts
+20) Carts
 ---------
 POST /carts
 {
@@ -203,7 +225,7 @@ POST /carts
   "isActive": true
 }
 
-18) Cart Items
+21) Cart Items
 --------------
 POST /cart-items
 {
@@ -213,4 +235,3 @@ POST /cart-items
   "unitPrice": 120000,
   "isActive": true
 }
-
