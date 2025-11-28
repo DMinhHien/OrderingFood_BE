@@ -62,17 +62,23 @@ export class RestaurantController {
   }
 
   @Get('search')
-  @ApiOperation({ summary: 'Tìm kiếm nhà hàng theo tên và category sản phẩm' })
+  @ApiOperation({ summary: 'Tìm kiếm nhà hàng theo tên và category' })
   @ApiResponse({
     status: 200,
     description: 'List of restaurants matching search criteria',
   })
   search(
     @Query('q') query?: string,
-    @Query('categoryIds') categoryIds?: string,
+    @Query('productCategoryIds') productCategoryIds?: string,
+    @Query('restaurantCategoryIds') restaurantCategoryIds?: string,
   ) {
-    const parsedIds = this.parseIds(categoryIds);
-    return this.restaurantService.search(query, parsedIds);
+    const parsedProductIds = this.parseIds(productCategoryIds);
+    const parsedRestaurantIds = this.parseIds(restaurantCategoryIds);
+    return this.restaurantService.search(
+      query,
+      parsedProductIds,
+      parsedRestaurantIds,
+    );
   }
 
   @Get(':id')

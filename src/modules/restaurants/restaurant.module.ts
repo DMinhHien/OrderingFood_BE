@@ -7,10 +7,11 @@ import { RestaurantCategoryModule } from '../restaurant-categories/restaurant-ca
 import { UserModule } from '../users/user.module';
 import { AddressModule } from '../addresses/address.module';
 import { Product } from '../products/product.model';
+import { CategoryProductMap } from '../category-product-maps/category-product-map.model';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Restaurant, Product]),
+    SequelizeModule.forFeature([Restaurant, Product, CategoryProductMap]),
     RestaurantCategoryModule,
     UserModule,
     AddressModule,
