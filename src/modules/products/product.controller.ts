@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -47,6 +48,43 @@ export class ProductController {
   })
   findAll() {
     return this.productService.findAll();
+  }
+
+  @Get('restaurant/:restaurantId')
+  @ApiOperation({ summary: 'Lấy tất cả sản phẩm của một nhà hàng' })
+  @ApiParam({ name: 'restaurantId', type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'List of products for the restaurant',
+  })
+  findByRestaurant(@Param('restaurantId', ParseIntPipe) restaurantId: number) {
+    return this.productService.findByRestaurant(restaurantId);
+  }
+
+  @Get('popular')
+  @ApiOperation({
+    summary: 'Lấy top 5 sản phẩm phổ biến nhất (có nhiều order nhất)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of popular products',
+  })
+  findPopular() {
+    return this.productService.findPopularProducts(5);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Tìm kiếm sản phẩm theo tên và category' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of products matching search criteria',
+  })
+  search(
+    @Query('q') query?: string,
+    @Query('categoryIds') categoryIds?: string,
+  ) {
+    const parsedIds = this.parseIds(categoryIds);
+    return this.productService.search(query, parsedIds);
   }
 
   @Get(':id')
@@ -88,5 +126,16 @@ export class ProductController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productService.remove(id);
+  }
+
+  private parseIds(value?: string): number[] | undefined {
+    if (!value) {
+      return undefined;
+    }
+    const ids = value
+      .split(',')
+      .map((id) => parseInt(id, 10))
+      .filter((id) => !Number.isNaN(id));
+    return ids.length > 0 ? ids : undefined;
   }
 }

@@ -10,12 +10,14 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { ProductCategory } from '../product-categories/product-category.model';
 import { Restaurant } from '../restaurants/restaurant.model';
 import { OrderDetail } from '../order-details/order-detail.model';
 import { Menu } from '../menus/menu.model';
 import { CartItem } from '../cart-items/cart-item.model';
+import { CategoryProductMap } from '../category-product-maps/category-product-map.model';
 
 @Table({
   tableName: 'products',
@@ -59,17 +61,6 @@ export class Product extends Model<Product> {
   })
   available: boolean;
 
-  @ForeignKey(() => ProductCategory)
-  @Column({
-    field: 'categorieId',
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  categorieProductId: number;
-
-  @BelongsTo(() => ProductCategory, { as: 'productCategory' })
-  productCategory: ProductCategory;
-
   @ForeignKey(() => Restaurant)
   @Column({
     type: DataType.INTEGER,
@@ -101,6 +92,9 @@ export class Product extends Model<Product> {
 
   @UpdatedAt
   declare updatedAt: Date;
+
+  @BelongsToMany(() => ProductCategory, () => CategoryProductMap)
+  categories: ProductCategory[];
 
   @HasMany(() => OrderDetail)
   orderDetails: OrderDetail[];

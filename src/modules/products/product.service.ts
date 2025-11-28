@@ -7,34 +7,23 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Product } from './product.model';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductCategory } from '../product-categories/product-category.model';
 import { Restaurant } from '../restaurants/restaurant.model';
 import { Menu } from '../menus/menu.model';
+import { OrderDetail } from '../order-details/order-detail.model';
+import { Op, QueryTypes } from 'sequelize';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectModel(Product)
     private productModel: typeof Product,
-    @InjectModel(ProductCategory)
-    private readonly productCategoryModel: typeof ProductCategory,
     @InjectModel(Restaurant)
     private readonly restaurantModel: typeof Restaurant,
     @InjectModel(Menu)
     private readonly menuModel: typeof Menu,
+    @InjectModel(OrderDetail)
+    private readonly orderDetailModel: typeof OrderDetail,
   ) {}
-
-  private async ensureCategory(id: number): Promise<void> {
-    const category = await this.productCategoryModel.findOne({
-      where: { id, isActive: true },
-    });
-
-    if (!category) {
-      throw new NotFoundException(
-        `Product category với ID ${id} không tồn tại hoặc đã bị vô hiệu hóa`,
-      );
-    }
-  }
 
   private async ensureRestaurant(id: number): Promise<void> {
     const restaurant = await this.restaurantModel.findOne({
@@ -78,7 +67,6 @@ export class ProductService {
   }
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    await this.ensureCategory(createProductDto.categorieProductId);
     await this.ensureRestaurant(createProductDto.restaurantID);
 
     if (createProductDto.menuID) {
@@ -100,14 +88,21 @@ export class ProductService {
   async findAll(): Promise<Product[]> {
     return this.productModel.findAll({
       where: { isActive: true },
-      include: ['productCategory', 'restaurant', 'menu'],
+      include: ['categories', 'restaurant', 'menu'],
+    });
+  }
+
+  async findByRestaurant(restaurantId: number): Promise<Product[]> {
+    return this.productModel.findAll({
+      where: { restaurantID: restaurantId, isActive: true },
+      include: ['categories', 'restaurant', 'menu'],
     });
   }
 
   async findOne(id: number): Promise<Product> {
     const product = await this.productModel.findOne({
       where: { id, isActive: true },
-      include: ['productCategory', 'restaurant', 'menu'],
+      include: ['categories', 'restaurant', 'menu'],
     });
 
     if (!product) {
@@ -122,10 +117,6 @@ export class ProductService {
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
     const product = await this.findOne(id);
-
-    if (updateProductDto.categorieProductId) {
-      await this.ensureCategory(updateProductDto.categorieProductId);
-    }
 
     const targetRestaurantId =
       updateProductDto.restaurantID ?? product.restaurantID;
@@ -145,5 +136,111 @@ export class ProductService {
   async remove(id: number): Promise<void> {
     const product = await this.findOne(id);
     await product.update({ isActive: false });
+  }
+
+  // Lấy top 5 products có nhiều order nhất, nếu không đủ thì bổ sung bằng các món mới nhất
+  async findPopularProducts(limit: number = 5): Promise<Product[]> {
+    const sequelize = this.productModel.sequelize;
+    if (!sequelize) {
+      // Fallback: lấy các món mới nhất
+      return this.productModel.findAll({
+        where: { isActive: true },
+        include: ['categories', 'restaurant', 'menu'],
+        order: [['createdAt', 'DESC']],
+        limit,
+      });
+    }
+
+    // Lấy các products có nhiều order nhất
+    const results = await sequelize.query(
+      `
+      SELECT "productId", COUNT(*) as "orderCount"
+      FROM "order_details"
+      WHERE "isActive" = true
+      GROUP BY "productId"
+      ORDER BY "orderCount" DESC
+      LIMIT :limit
+    `,
+      {
+        replacements: { limit },
+        type: QueryTypes.SELECT,
+      },
+    );
+
+    const productIds = (results as any[]).map((item: any) => item.productId);
+    const popularProducts: Product[] = [];
+
+    if (productIds.length > 0) {
+      const products = await this.productModel.findAll({
+        where: {
+          id: productIds,
+          isActive: true,
+        },
+        include: ['categories', 'restaurant', 'menu'],
+      });
+
+      // Sắp xếp theo thứ tự productIds để giữ nguyên thứ tự popularity
+      popularProducts.push(
+        ...products.sort((a, b) => {
+          const indexA = productIds.indexOf(a.id);
+          const indexB = productIds.indexOf(b.id);
+          return indexA - indexB;
+        }),
+      );
+    }
+
+    // Nếu chưa đủ limit, bổ sung bằng các món mới nhất
+    if (popularProducts.length < limit) {
+      const remainingCount = limit - popularProducts.length;
+      const existingIds = popularProducts.map((p) => p.id);
+
+      const whereCondition: any = { isActive: true };
+      if (existingIds.length > 0) {
+        whereCondition.id = { [Op.notIn]: existingIds };
+      }
+
+      const recentProducts = await this.productModel.findAll({
+        where: whereCondition,
+        include: ['categories', 'restaurant', 'menu'],
+        order: [['createdAt', 'DESC']],
+        limit: remainingCount,
+      });
+
+      popularProducts.push(...recentProducts);
+    }
+
+    return popularProducts.slice(0, limit);
+  }
+
+  // Tìm kiếm products theo tên và category
+  async search(query?: string, categoryIds?: number[]): Promise<Product[]> {
+    const where: any = { isActive: true };
+
+    if (query) {
+      where[Op.or] = [
+        { name: { [Op.like]: `%${query}%` } },
+        { description: { [Op.like]: `%${query}%` } },
+      ];
+    }
+
+    const include: any[] = ['restaurant', 'menu'];
+
+    if (categoryIds && categoryIds.length > 0) {
+      include.push({
+        association: 'categories',
+        where: { id: { [Op.in]: categoryIds } },
+        required: true,
+      });
+    } else {
+      include.push({
+        association: 'categories',
+        required: false,
+      });
+    }
+
+    return this.productModel.findAll({
+      where,
+      include,
+    });
   }
 }
