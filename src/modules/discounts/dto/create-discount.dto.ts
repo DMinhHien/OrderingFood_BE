@@ -23,7 +23,7 @@ export class CreateDiscountDto {
 
   @IsInt()
   @IsOptional()
-  minOrderVale?: number;
+  minOrderValue?: number;
 
   @IsInt()
   @IsNotEmpty()
