@@ -1,14 +1,15 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  ParseIntPipe,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -47,6 +48,36 @@ export class FeedbackController {
   })
   findAll() {
     return this.feedbackService.findAll();
+  }
+
+  @Get('order/:orderId')
+  @ApiOperation({ summary: 'Get feedback by order' })
+  @ApiParam({ name: 'orderId', type: Number, description: 'Order ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Feedback of specific order (if any)',
+  })
+  findByOrder(@Param('orderId', ParseIntPipe) orderId: number) {
+    return this.feedbackService.findByOrder(orderId);
+  }
+
+  @Get('restaurant/:restaurantId')
+  @ApiOperation({ summary: 'Get feedbacks by restaurant with summary' })
+  @ApiParam({
+    name: 'restaurantId',
+    type: Number,
+    description: 'Restaurant ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Feedback list and summary for a restaurant',
+  })
+  findByRestaurant(
+    @Param('restaurantId', ParseIntPipe) restaurantId: number,
+    @Query('rating') rating?: string,
+  ) {
+    const ratingFilter = rating ? parseInt(rating, 10) : undefined;
+    return this.feedbackService.findByRestaurant(restaurantId, ratingFilter);
   }
 
   @Get(':id')

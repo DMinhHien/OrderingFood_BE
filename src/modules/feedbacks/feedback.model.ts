@@ -9,8 +9,10 @@ import {
   UpdatedAt,
   ForeignKey,
   BelongsTo,
+  HasMany,
 } from 'sequelize-typescript';
 import { Order } from '../orders/order.model';
+import { Response } from '../responses/response.model';
 
 @Table({
   tableName: 'feedbacks',
@@ -38,7 +40,7 @@ export class Feedback extends Model<Feedback> {
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
   })
   imageUrl: string;
 
@@ -57,6 +59,9 @@ export class Feedback extends Model<Feedback> {
 
   @BelongsTo(() => Order)
   order: Order;
+
+  @HasMany(() => Response, { foreignKey: 'feedbackId', as: 'responses' })
+  responses: Response[];
 
   @CreatedAt
   declare createdAt: Date;

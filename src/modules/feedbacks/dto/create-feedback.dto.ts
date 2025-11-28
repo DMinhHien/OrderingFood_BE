@@ -16,8 +16,8 @@ export class CreateFeedbackDto {
   content: string;
 
   @IsString()
-  @IsNotEmpty()
-  imageUrl: string;
+  @IsOptional()
+  imageUrl?: string;
 
   @IsBoolean()
   @IsOptional()
