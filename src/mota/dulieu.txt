@@ -1,7 +1,7 @@
 ==============================
 Sample request bodies cho Swagger
 ==============================
-Mota
+Mota tahy đoi du lieu
 1) Roles
 --------
 POST /roles
