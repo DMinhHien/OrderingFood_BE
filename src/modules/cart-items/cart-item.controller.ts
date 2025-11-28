@@ -67,4 +67,25 @@ export class CartItemController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.cartItemService.remove(id);
   }
+
+  @Get('cart/:cartId')
+  @ApiOperation({ summary: 'Lấy tất cả cart items của một cart' })
+  @ApiParam({ name: 'cartId', type: Number })
+  findByCart(@Param('cartId', ParseIntPipe) cartId: number) {
+    return this.cartItemService.findByCart(cartId);
+  }
+
+  @Get('cart/:cartId/product/:productId')
+  @ApiOperation({
+    summary:
+      'Tìm cart item theo cartId và productId (bao gồm cả isActive = false)',
+  })
+  @ApiParam({ name: 'cartId', type: Number })
+  @ApiParam({ name: 'productId', type: Number })
+  findByCartAndProductAny(
+    @Param('cartId', ParseIntPipe) cartId: number,
+    @Param('productId', ParseIntPipe) productId: number,
+  ) {
+    return this.cartItemService.findByCartAndProductAny(cartId, productId);
+  }
 }

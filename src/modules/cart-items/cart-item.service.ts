@@ -73,11 +73,29 @@ export class CartItemService {
     return item;
   }
 
+  // Tìm cart item theo ID (bao gồm cả isActive = false)
+  async findOneAny(id: number): Promise<CartItem> {
+    const item = await this.cartItemModel.findOne({
+      where: { id },
+      include: ['cart', 'product'],
+    });
+
+    if (!item) {
+      throw new NotFoundException(`Cart item với ID ${id} không tồn tại`);
+    }
+
+    return item;
+  }
+
   async update(
     id: number,
     updateCartItemDto: UpdateCartItemDto,
   ): Promise<CartItem> {
-    const item = await this.findOne(id);
+    // Nếu đang cập nhật isActive = true, cần tìm item bao gồm cả isActive = false
+    const shouldFindAny = updateCartItemDto.isActive === true;
+    const item = shouldFindAny
+      ? await this.findOneAny(id)
+      : await this.findOne(id);
 
     if (updateCartItemDto.cartId) {
       await this.ensureCart(updateCartItemDto.cartId);
@@ -88,11 +106,55 @@ export class CartItemService {
     }
 
     await item.update(updateCartItemDto);
+
+    // Sau khi update, luôn tìm lại với isActive = true để trả về
+    // Nếu item vẫn có isActive = false thì sẽ throw error (đúng behavior)
+    if (updateCartItemDto.isActive === true) {
+      return this.findOne(id);
+    }
     return this.findOne(id);
   }
 
   async remove(id: number): Promise<void> {
     const item = await this.findOne(id);
     await item.update({ isActive: false });
+  }
+
+  // Lấy tất cả cart items của một cart
+  async findByCart(cartId: number): Promise<CartItem[]> {
+    return this.cartItemModel.findAll({
+      where: { cartId, isActive: true },
+      include: [
+        {
+          association: 'product',
+          include: ['categories', 'restaurant', 'menu'],
+        },
+        'cart',
+      ],
+      order: [['createdAt', 'ASC']],
+    });
+  }
+
+  // Tìm cart item theo cartId và productId (để check xem đã có trong cart chưa)
+  async findByCartAndProduct(
+    cartId: number,
+    productId: number,
+  ): Promise<CartItem | null> {
+    return this.cartItemModel.findOne({
+      where: { cartId, productId, isActive: true },
+      include: ['product', 'cart'],
+    });
+  }
+
+  // Tìm cart item theo cartId và productId (bao gồm cả isActive = false)
+  async findByCartAndProductAny(
+    cartId: number,
+    productId: number,
+  ): Promise<CartItem | null> {
+    return this.cartItemModel.findOne({
+      where: { cartId, productId },
+      include: ['product', 'cart'],
+      order: [['createdAt', 'DESC']],
+    });
   }
 }

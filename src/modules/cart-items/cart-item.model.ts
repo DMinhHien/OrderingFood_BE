@@ -14,7 +14,7 @@ import { Cart } from '../carts/cart.model';
 import { Product } from '../products/product.model';
 
 @Table({
-  tableName: 'cart_items',
+  tableName: 'cart_item',
   timestamps: true,
 })
 export class CartItem extends Model<CartItem> {
@@ -37,6 +37,7 @@ export class CartItem extends Model<CartItem> {
 
   @ForeignKey(() => Product)
   @Column({
+    field: 'productID',
     type: DataType.INTEGER,
     allowNull: false,
   })
