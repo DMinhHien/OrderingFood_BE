@@ -81,6 +81,9 @@ export class OrderService {
         },
         'discount',
         {
+          association: 'payments',
+        },
+        {
           association: 'feedbacks',
           include: [
             {
@@ -118,6 +121,9 @@ export class OrderService {
           include: ['product'],
         },
         'discount',
+        {
+          association: 'payments',
+        },
         {
           association: 'feedbacks',
           include: [
