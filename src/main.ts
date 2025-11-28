@@ -1,10 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Cấu hình static file serving cho uploads
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   // Enable CORS
   app.enableCors();
@@ -28,6 +35,9 @@ async function bootstrap() {
     .addTag('addresses', 'Address management endpoints')
     .addTag('restaurant-categories', 'Restaurant category endpoints')
     .addTag('product-categories', 'Product category endpoints')
+    .addTag('user-addresses', 'User address linking endpoints')
+    .addTag('category-restaurant-maps', 'Restaurant-category map endpoints')
+    .addTag('category-product-maps', 'Product-category map endpoints')
     .addTag('menus', 'Menu management endpoints')
     .addTag('carts', 'Cart management endpoints')
     .addTag('cart-items', 'Cart item management endpoints')
@@ -46,7 +56,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT ?? 3000;
+  const port = process.env.PORT ?? 5000;
   await app.listen(port);
   console.log(`Server started on port ${port}`);
   console.log(

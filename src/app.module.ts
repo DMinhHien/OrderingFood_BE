@@ -22,6 +22,13 @@ import { NotificationModule } from './modules/notifications/notification.module'
 import { RevenueReportModule } from './modules/revenue-reports/revenue-report.module';
 import { CartModule } from './modules/carts/cart.module';
 import { CartItemModule } from './modules/cart-items/cart-item.module';
+import { UserAddressModule } from './modules/user-addresses/user-address.module';
+import { CategoryRestaurantMapModule } from './modules/category-restaurant-maps/category-restaurant-map.module';
+import { CategoryProductMapModule } from './modules/category-product-maps/category-product-map.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UploadModule } from './modules/upload/upload.module';
+import { GeocodingModule } from './modules/geocoding/geocoding.module';
+import { RestaurantDashboardModule } from './modules/restaurant-dashboard/restaurant-dashboard.module';
 
 @Module({
   imports: [
@@ -52,6 +59,13 @@ import { CartItemModule } from './modules/cart-items/cart-item.module';
     RevenueReportModule,
     CartModule,
     CartItemModule,
+    UserAddressModule,
+    CategoryRestaurantMapModule,
+    CategoryProductMapModule,
+    AuthModule,
+    UploadModule,
+    GeocodingModule,
+    RestaurantDashboardModule,
   ],
   providers: [DatabaseSyncService],
 })
