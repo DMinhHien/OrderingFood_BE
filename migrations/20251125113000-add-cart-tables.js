@@ -10,7 +10,7 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
       },
-      userId: {
+      userID: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -40,7 +40,7 @@ module.exports = {
       },
     });
 
-    await queryInterface.createTable('cart_items', {
+    await queryInterface.createTable('cart_item', {
       id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -57,7 +57,7 @@ module.exports = {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       },
-      productId: {
+      productID: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -94,7 +94,7 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable('cart_items');
+    await queryInterface.dropTable('cart_item');
     await queryInterface.dropTable('carts');
   },
 };

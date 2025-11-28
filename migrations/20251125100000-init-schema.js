@@ -3,7 +3,6 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // 1) roles
     await queryInterface.createTable('roles', {
       id: {
         type: Sequelize.INTEGER,
@@ -30,7 +29,6 @@ module.exports = {
       },
     });
 
-    // 2) address
     await queryInterface.createTable('address', {
       id: {
         type: Sequelize.INTEGER,
@@ -86,7 +84,6 @@ module.exports = {
       },
     });
 
-    // 3) categories_restaurant
     await queryInterface.createTable('categories_restaurant', {
       id: {
         type: Sequelize.INTEGER,
@@ -113,7 +110,6 @@ module.exports = {
       },
     });
 
-    // 4) categories_product
     await queryInterface.createTable('categories_product', {
       id: {
         type: Sequelize.INTEGER,
@@ -140,7 +136,6 @@ module.exports = {
       },
     });
 
-    // 5) users
     await queryInterface.createTable('users', {
       id: {
         type: Sequelize.INTEGER,
@@ -188,16 +183,6 @@ module.exports = {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       },
-      addressId: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        references: {
-          model: 'address',
-          key: 'id',
-        },
-        onDelete: 'SET NULL',
-        onUpdate: 'CASCADE',
-      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -208,7 +193,6 @@ module.exports = {
       },
     });
 
-    // 6) restaurants
     await queryInterface.createTable('restaurants', {
       id: {
         type: Sequelize.INTEGER,
@@ -243,16 +227,6 @@ module.exports = {
       status: {
         type: Sequelize.INTEGER,
         allowNull: true,
-      },
-      categorieID: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'categories_restaurant',
-          key: 'id',
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
       },
       userId: {
         type: Sequelize.INTEGER,
@@ -289,7 +263,6 @@ module.exports = {
       },
     });
 
-    // 7) menus
     await queryInterface.createTable('menus', {
       id: {
         type: Sequelize.INTEGER,
@@ -326,62 +299,6 @@ module.exports = {
       },
     });
 
-    // 8) discounts
-    await queryInterface.createTable('discounts', {
-      id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      code: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      description: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      percent: {
-        type: Sequelize.FLOAT,
-        allowNull: true,
-      },
-      minOrderVale: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-      },
-      quantity: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      startTime: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      endTime: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      status: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      isActive: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
-      createdAt: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-      updatedAt: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-    });
-
-    // 9) products
     await queryInterface.createTable('products', {
       id: {
         type: Sequelize.INTEGER,
@@ -409,16 +326,6 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true,
-      },
-      categorieId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'categories_product',
-          key: 'id',
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
       },
       restaurantID: {
         type: Sequelize.INTEGER,
@@ -455,7 +362,224 @@ module.exports = {
       },
     });
 
-    // 10) orders
+    await queryInterface.createTable('users_address', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      userID: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+      addressID: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'address',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+
+    await queryInterface.createTable('category_restaurant_map', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      restaurantID: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'restaurants',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+      categoryID: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'categories_restaurant',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+
+    await queryInterface.createTable('category_product_map', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      productID: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'products',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+      categoryID: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'categories_product',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+
+    await queryInterface.createTable('revenue_reports', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      month: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      year: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      totalOrders: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      totalRevenue: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      restaurantId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'restaurants',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+
+    await queryInterface.createTable('discounts', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      code: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      percent: {
+        type: Sequelize.FLOAT,
+        allowNull: true,
+      },
+      minOrderValue: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      quantity: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      startTime: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      endTime: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      status: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+
     await queryInterface.createTable('orders', {
       id: {
         type: Sequelize.INTEGER,
@@ -474,6 +598,10 @@ module.exports = {
       shippingFee: {
         type: Sequelize.INTEGER,
         allowNull: false,
+      },
+      note: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       isActive: {
         type: Sequelize.BOOLEAN,
@@ -512,12 +640,12 @@ module.exports = {
       },
       discountId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'discounts',
           key: 'id',
         },
-        onDelete: 'CASCADE',
+        onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       },
       createdAt: {
@@ -530,7 +658,6 @@ module.exports = {
       },
     });
 
-    // 11) order_details
     await queryInterface.createTable('order_details', {
       id: {
         type: Sequelize.INTEGER,
@@ -581,7 +708,6 @@ module.exports = {
       },
     });
 
-    // 12) payments
     await queryInterface.createTable('payments', {
       id: {
         type: Sequelize.INTEGER,
@@ -622,7 +748,6 @@ module.exports = {
       },
     });
 
-    // 13) feedbacks
     await queryInterface.createTable('feedbacks', {
       id: {
         type: Sequelize.INTEGER,
@@ -640,7 +765,7 @@ module.exports = {
       },
       imageUrl: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       isActive: {
         type: Sequelize.BOOLEAN,
@@ -667,7 +792,6 @@ module.exports = {
       },
     });
 
-    // 14) responses
     await queryInterface.createTable('responses', {
       id: {
         type: Sequelize.INTEGER,
@@ -675,7 +799,7 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
       },
-      sellId: {
+      sentId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -685,21 +809,11 @@ module.exports = {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       },
-      reviewId: {
+      feedbackID: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'users',
-          key: 'id',
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
-      },
-      adminId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'users',
+          model: 'feedbacks',
           key: 'id',
         },
         onDelete: 'CASCADE',
@@ -732,7 +846,6 @@ module.exports = {
       },
     });
 
-    // 15) notifications
     await queryInterface.createTable('notifications', {
       id: {
         type: Sequelize.INTEGER,
@@ -757,6 +870,16 @@ module.exports = {
         allowNull: false,
         defaultValue: true,
       },
+      sentId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
       receivedId: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -769,61 +892,12 @@ module.exports = {
       },
       orderId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'orders',
           key: 'id',
         },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
-      },
-      createdAt: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-      updatedAt: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-    });
-
-    // 16) revenue_reports
-    await queryInterface.createTable('revenue_reports', {
-      id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      month: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      year: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      totalOrders: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-      },
-      totalRevenue: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-      },
-      isActive: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
-      restaurantId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'restaurants',
-          key: 'id',
-        },
-        onDelete: 'CASCADE',
+        onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       },
       createdAt: {
@@ -838,15 +912,18 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable('revenue_reports');
     await queryInterface.dropTable('notifications');
     await queryInterface.dropTable('responses');
     await queryInterface.dropTable('feedbacks');
     await queryInterface.dropTable('payments');
     await queryInterface.dropTable('order_details');
     await queryInterface.dropTable('orders');
-    await queryInterface.dropTable('products');
     await queryInterface.dropTable('discounts');
+    await queryInterface.dropTable('revenue_reports');
+    await queryInterface.dropTable('category_product_map');
+    await queryInterface.dropTable('category_restaurant_map');
+    await queryInterface.dropTable('users_address');
+    await queryInterface.dropTable('products');
     await queryInterface.dropTable('menus');
     await queryInterface.dropTable('restaurants');
     await queryInterface.dropTable('users');
