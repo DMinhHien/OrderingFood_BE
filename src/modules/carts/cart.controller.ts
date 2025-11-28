@@ -64,4 +64,19 @@ export class CartController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.cartService.remove(id);
   }
+
+  @Get('user/:userId')
+  @ApiOperation({ summary: 'Lấy giỏ hàng active của user' })
+  @ApiParam({ name: 'userId', type: Number })
+  @ApiResponse({ status: 200, description: 'Giỏ hàng được tìm thấy' })
+  findByUser(@Param('userId', ParseIntPipe) userId: number) {
+    return this.cartService.findByUser(userId);
+  }
+
+  @Get('user/:userId/get-or-create')
+  @ApiOperation({ summary: 'Lấy hoặc tạo giỏ hàng active của user' })
+  @ApiParam({ name: 'userId', type: Number })
+  getOrCreateUserCart(@Param('userId', ParseIntPipe) userId: number) {
+    return this.cartService.getOrCreateUserCart(userId);
+  }
 }
