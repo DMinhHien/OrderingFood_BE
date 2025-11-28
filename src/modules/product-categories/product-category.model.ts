@@ -8,8 +8,10 @@ import {
   CreatedAt,
   UpdatedAt,
   HasMany,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { Product } from '../products/product.model';
+import { CategoryProductMap } from '../category-product-maps/category-product-map.model';
 
 @Table({
   tableName: 'categories_product',
@@ -41,6 +43,6 @@ export class ProductCategory extends Model<ProductCategory> {
   @UpdatedAt
   declare updatedAt: Date;
 
-  @HasMany(() => Product)
+  @BelongsToMany(() => Product, () => CategoryProductMap)
   products: Product[];
 }
