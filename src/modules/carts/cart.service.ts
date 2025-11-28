@@ -24,14 +24,28 @@ export class CartService {
   async findAll(): Promise<Cart[]> {
     return this.cartModel.findAll({
       where: { isActive: true },
-      include: ['user', 'items'],
+      include: [
+        'user',
+        {
+          association: 'items',
+          where: { isActive: true },
+          required: false,
+        },
+      ],
     });
   }
 
   async findOne(id: number): Promise<Cart> {
     const cart = await this.cartModel.findOne({
       where: { id, isActive: true },
-      include: ['user', 'items'],
+      include: [
+        'user',
+        {
+          association: 'items',
+          where: { isActive: true },
+          required: false,
+        },
+      ],
     });
 
     if (!cart) {
@@ -50,5 +64,36 @@ export class CartService {
   async remove(id: number): Promise<void> {
     const cart = await this.findOne(id);
     await cart.update({ isActive: false });
+  }
+
+  // Lấy cart active của user
+  async findByUser(userId: number): Promise<Cart | null> {
+    return this.cartModel.findOne({
+      where: { userId, isActive: true, status: 'ACTIVE' },
+      include: [
+        'user',
+        {
+          association: 'items',
+          where: { isActive: true },
+          required: false,
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
+  // Tạo hoặc lấy cart active của user
+  async getOrCreateUserCart(userId: number): Promise<Cart> {
+    let cart = await this.findByUser(userId);
+
+    if (!cart) {
+      cart = await this.create({
+        userId,
+        status: 'ACTIVE',
+        isActive: true,
+      });
+    }
+
+    return this.findOne(cart.id);
   }
 }
