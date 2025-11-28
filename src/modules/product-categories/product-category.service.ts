@@ -21,8 +21,9 @@ export class ProductCategoryService {
   }
 
   async findAll(): Promise<ProductCategory[]> {
+    // Trả về tất cả categories (không filter isActive) để hiển thị đầy đủ trong form thêm sản phẩm
     return this.productCategoryModel.findAll({
-      where: { isActive: true },
+      order: [['name', 'ASC']],
     });
   }
 

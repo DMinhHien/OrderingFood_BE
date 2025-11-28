@@ -225,22 +225,47 @@ export class ProductService {
 
     const include: any[] = ['restaurant', 'menu'];
 
+    // Nếu có categoryIds, chỉ lấy products có TẤT CẢ các category đã chọn
     if (categoryIds && categoryIds.length > 0) {
-      include.push({
-        association: 'categories',
-        where: { id: { [Op.in]: categoryIds } },
-        required: true,
+      // Lấy tất cả products có ít nhất một category trong danh sách
+      const productsWithCategories = await this.productModel.findAll({
+        where,
+        include: [
+          ...include,
+          {
+            association: 'categories',
+            where: { id: { [Op.in]: categoryIds } },
+            required: true,
+          },
+        ],
       });
+
+      // Filter để chỉ giữ lại products có TẤT CẢ các category đã chọn
+      const filteredProducts: Product[] = [];
+      for (const product of productsWithCategories) {
+        const productCategoryIds = (product.categories || []).map(
+          (cat: any) => cat.id,
+        );
+        // Kiểm tra xem product có tất cả categoryIds không
+        const hasAllCategories = categoryIds.every((catId) =>
+          productCategoryIds.includes(catId),
+        );
+        if (hasAllCategories) {
+          filteredProducts.push(product);
+        }
+      }
+
+      return filteredProducts;
     } else {
       include.push({
         association: 'categories',
         required: false,
       });
-    }
 
-    return this.productModel.findAll({
-      where,
-      include,
-    });
+      return this.productModel.findAll({
+        where,
+        include,
+      });
+    }
   }
 }
