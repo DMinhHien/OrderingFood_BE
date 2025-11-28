@@ -29,6 +29,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { GeocodingModule } from './modules/geocoding/geocoding.module';
 import { RestaurantDashboardModule } from './modules/restaurant-dashboard/restaurant-dashboard.module';
+import { OrderJourneyModule } from './modules/order-journeys/order-journey.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { RestaurantDashboardModule } from './modules/restaurant-dashboard/restau
     UploadModule,
     GeocodingModule,
     RestaurantDashboardModule,
+    OrderJourneyModule,
   ],
   providers: [DatabaseSyncService],
 })
