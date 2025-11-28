@@ -49,6 +49,17 @@ export class PaymentController {
     return this.paymentService.findAll();
   }
 
+  @Get('order/:orderId')
+  @ApiOperation({ summary: 'Get payments by order ID' })
+  @ApiParam({ name: 'orderId', type: Number, description: 'Order ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of payments for the order',
+  })
+  findByOrder(@Param('orderId', ParseIntPipe) orderId: number) {
+    return this.paymentService.findByOrder(orderId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a payment by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Payment ID' })
