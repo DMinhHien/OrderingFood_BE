@@ -43,10 +43,11 @@ export class Discount extends Model<Discount> {
   percent: number;
 
   @Column({
+    field: 'minOrderValue',
     type: DataType.INTEGER,
     allowNull: true,
   })
-  minOrderVale: number;
+  minOrderValue: number;
 
   @Column({
     type: DataType.INTEGER,
