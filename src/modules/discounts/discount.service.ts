@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
 import { Discount } from './discount.model';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
@@ -25,8 +26,25 @@ export class DiscountService {
   }
 
   async findAll(): Promise<Discount[]> {
-    return this.discountModel.findAll({
-      where: { isActive: true },
+    const now = new Date();
+
+    const discounts = await this.discountModel.findAll({
+      where: {
+        isActive: true,
+        status: 'ACTIVE',
+      },
+    });
+
+    return discounts.filter((discount) => {
+      const startTime = discount.startTime
+        ? new Date(discount.startTime)
+        : null;
+      const endTime = discount.endTime ? new Date(discount.endTime) : null;
+
+      const afterStart = !startTime || now >= startTime;
+      const beforeEnd = !endTime || now <= endTime;
+
+      return afterStart && beforeEnd;
     });
   }
 
