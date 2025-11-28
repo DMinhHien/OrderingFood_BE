@@ -44,10 +44,10 @@ export class OrderJourney extends Model<OrderJourney> {
   longitude: number;
 
   @Column({
-    type: DataType.TIME,
+    type: DataType.DATE,
     allowNull: true,
   })
-  timeline: string;
+  timeline: Date;
 
   @Column({
     type: DataType.BOOLEAN,
