@@ -8,10 +8,12 @@ import {
   CreatedAt,
   UpdatedAt,
   HasMany,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { User } from '../users/user.model';
 import { Restaurant } from '../restaurants/restaurant.model';
 import { Order } from '../orders/order.model';
+import { UserAddress } from '../user-addresses/user-address.model';
 
 @Table({
   tableName: 'address',
@@ -85,7 +87,7 @@ export class Address extends Model<Address> {
   @UpdatedAt
   declare updatedAt: Date;
 
-  @HasMany(() => User)
+  @BelongsToMany(() => User, () => UserAddress)
   users: User[];
 
   @HasMany(() => Restaurant)
