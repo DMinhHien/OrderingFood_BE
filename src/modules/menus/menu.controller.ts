@@ -40,6 +40,13 @@ export class MenuController {
     return this.menuService.findAll();
   }
 
+  @Get('restaurant/:restaurantId')
+  @ApiOperation({ summary: 'Lấy tất cả menu của một nhà hàng' })
+  @ApiParam({ name: 'restaurantId', type: Number })
+  findByRestaurant(@Param('restaurantId', ParseIntPipe) restaurantId: number) {
+    return this.menuService.findByRestaurant(restaurantId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lấy menu theo ID' })
   @ApiParam({ name: 'id', type: Number })

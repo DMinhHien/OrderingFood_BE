@@ -25,6 +25,13 @@ export class MenuService {
     });
   }
 
+  async findByRestaurant(restaurantId: number): Promise<Menu[]> {
+    return this.menuModel.findAll({
+      where: { restaurantID: restaurantId, isActive: true },
+      include: ['restaurant'],
+    });
+  }
+
   async findOne(id: number): Promise<Menu> {
     const menu = await this.menuModel.findOne({
       where: { id, isActive: true },
