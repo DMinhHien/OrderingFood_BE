@@ -10,13 +10,14 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { RestaurantCategory } from '../restaurant-categories/restaurant-category.model';
 import { User } from '../users/user.model';
 import { Address } from '../addresses/address.model';
 import { Product } from '../products/product.model';
 import { Order } from '../orders/order.model';
-import { RevenueReport } from '../revenue-reports/revenue-report.model';
+import { CategoryRestaurantMap } from '../category-restaurant-maps/category-restaurant-map.model';
 
 @Table({
   tableName: 'restaurants',
@@ -72,17 +73,6 @@ export class Restaurant extends Model<Restaurant> {
   })
   status: number;
 
-  @ForeignKey(() => RestaurantCategory)
-  @Column({
-    field: 'categorieID',
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  categorieRestaurantID: number;
-
-  @BelongsTo(() => RestaurantCategory, { as: 'restaurantCategory' })
-  restaurantCategory: RestaurantCategory;
-
   @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
@@ -115,12 +105,12 @@ export class Restaurant extends Model<Restaurant> {
   @UpdatedAt
   declare updatedAt: Date;
 
+  @BelongsToMany(() => RestaurantCategory, () => CategoryRestaurantMap)
+  categories: RestaurantCategory[];
+
   @HasMany(() => Product)
   products: Product[];
 
   @HasMany(() => Order)
   orders: Order[];
-
-  @HasMany(() => RevenueReport)
-  revenueReports: RevenueReport[];
 }

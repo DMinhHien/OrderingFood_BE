@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -47,6 +48,31 @@ export class RestaurantController {
   })
   findAll() {
     return this.restaurantService.findAll();
+  }
+
+  @Get('owner/:userId')
+  @ApiOperation({ summary: 'Get restaurants owned by a user' })
+  @ApiParam({ name: 'userId', type: Number, description: 'Owner user ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of restaurants for the given owner',
+  })
+  findByOwner(@Param('userId', ParseIntPipe) userId: number) {
+    return this.restaurantService.findByOwner(userId);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Tìm kiếm nhà hàng theo tên và category sản phẩm' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of restaurants matching search criteria',
+  })
+  search(
+    @Query('q') query?: string,
+    @Query('categoryIds') categoryIds?: string,
+  ) {
+    const parsedIds = this.parseIds(categoryIds);
+    return this.restaurantService.search(query, parsedIds);
   }
 
   @Get(':id')
@@ -88,5 +114,16 @@ export class RestaurantController {
   @ApiResponse({ status: 404, description: 'Restaurant not found' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.restaurantService.remove(id);
+  }
+
+  private parseIds(value?: string): number[] | undefined {
+    if (!value) {
+      return undefined;
+    }
+    const ids = value
+      .split(',')
+      .map((id) => parseInt(id, 10))
+      .filter((id) => !Number.isNaN(id));
+    return ids.length > 0 ? ids : undefined;
   }
 }

@@ -37,10 +37,6 @@ export class CreateRestaurantDto {
 
   @IsInt()
   @IsNotEmpty()
-  categorieRestaurantID: number;
-
-  @IsInt()
-  @IsNotEmpty()
   userId: number;
 
   @IsInt()

@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Restaurant } from './restaurant.model';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class RestaurantService {
@@ -18,17 +19,52 @@ export class RestaurantService {
     } as any);
   }
 
+  private getBaseInclude(productCategoryIds?: number[]) {
+    const requireProductMatch =
+      Array.isArray(productCategoryIds) && productCategoryIds.length > 0;
+
+    const productCategoriesInclude = requireProductMatch
+      ? [
+          {
+            association: 'categories',
+            required: true,
+            where: { id: { [Op.in]: productCategoryIds } },
+          },
+        ]
+      : [
+          {
+            association: 'categories',
+            required: false,
+          },
+        ];
+
+    return [
+      {
+        association: 'categories',
+        required: false,
+      },
+      'user',
+      'address',
+      {
+        association: 'products',
+        required: requireProductMatch,
+        where: { isActive: true },
+        include: productCategoriesInclude,
+      },
+    ];
+  }
+
   async findAll(): Promise<Restaurant[]> {
     return this.restaurantModel.findAll({
       where: { isActive: true },
-      include: ['restaurantCategory', 'user', 'address'],
+      include: this.getBaseInclude(),
     });
   }
 
   async findOne(id: number): Promise<Restaurant> {
     const restaurant = await this.restaurantModel.findOne({
       where: { id, isActive: true },
-      include: ['restaurantCategory', 'user', 'address'],
+      include: this.getBaseInclude(),
     });
 
     if (!restaurant) {
@@ -50,5 +86,30 @@ export class RestaurantService {
   async remove(id: number): Promise<void> {
     const restaurant = await this.findOne(id);
     await restaurant.update({ isActive: false });
+  }
+
+  async findByOwner(userId: number): Promise<Restaurant[]> {
+    return this.restaurantModel.findAll({
+      where: { userId, isActive: true },
+      include: this.getBaseInclude(),
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
+  // Tìm kiếm restaurants theo tên và category sản phẩm
+  async search(
+    query?: string,
+    productCategoryIds?: number[],
+  ): Promise<Restaurant[]> {
+    const where: any = { isActive: true };
+
+    if (query) {
+      where.name = { [Op.like]: `%${query}%` };
+    }
+
+    return this.restaurantModel.findAll({
+      where,
+      include: this.getBaseInclude(productCategoryIds),
+    });
   }
 }

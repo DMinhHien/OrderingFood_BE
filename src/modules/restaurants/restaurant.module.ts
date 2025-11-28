@@ -6,10 +6,11 @@ import { RestaurantController } from './restaurant.controller';
 import { RestaurantCategoryModule } from '../restaurant-categories/restaurant-category.module';
 import { UserModule } from '../users/user.module';
 import { AddressModule } from '../addresses/address.module';
+import { Product } from '../products/product.model';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Restaurant]),
+    SequelizeModule.forFeature([Restaurant, Product]),
     RestaurantCategoryModule,
     UserModule,
     AddressModule,
