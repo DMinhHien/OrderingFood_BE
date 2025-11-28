@@ -28,6 +28,7 @@ export class Cart extends Model<Cart> {
 
   @ForeignKey(() => User)
   @Column({
+    field: 'userID',
     type: DataType.INTEGER,
     allowNull: false,
   })
