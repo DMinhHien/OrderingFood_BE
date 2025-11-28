@@ -1,4 +1,10 @@
-import { IsBoolean, IsOptional, IsInt, IsNotEmpty } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 
 export class CreateOrderDto {
   @IsInt()
@@ -12,6 +18,10 @@ export class CreateOrderDto {
   @IsInt()
   @IsNotEmpty()
   shippingFee: number;
+
+  @IsString()
+  @IsOptional()
+  note?: string;
 
   @IsBoolean()
   @IsOptional()
@@ -30,6 +40,6 @@ export class CreateOrderDto {
   addressId: number;
 
   @IsInt()
-  @IsNotEmpty()
-  discountId: number;
+  @IsOptional()
+  discountId?: number;
 }
