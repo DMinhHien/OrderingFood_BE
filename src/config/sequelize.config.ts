@@ -9,18 +9,37 @@ export const sequelizeConfig = (
     'postgres') as Dialect;
 
   const host = configService.get<string>('DB_HOST');
+  const port = Number(configService.get<string>('DB_PORT')) || 5432;
+  const database = configService.get<string>('DB_NAME');
+  const username = configService.get<string>('DB_USERNAME');
+  const password = configService.get<string>('DB_PASSWORD');
   const useSsl = configService.get<string>('DB_SSL') === 'true';
 
   // Neon và các cloud PostgreSQL khác yêu cầu SSL
   // Tự động bật SSL nếu host chứa 'neon.tech' hoặc DB_SSL=true
   const requiresSsl = useSsl || (host && host.includes('neon.tech'));
 
+  // Debug logging - kiểm tra các biến env có được đọc đúng không
+  console.log('🔍 Database Config Debug:');
+  console.log('  Host:', host || '❌ MISSING');
+  console.log('  Port:', port);
+  console.log('  Database:', database || '❌ MISSING');
+  console.log('  Username:', username || '❌ MISSING');
+  console.log('  Password:', password ? '***' : '❌ MISSING');
+  console.log('  SSL Required:', requiresSsl);
+  console.log('  Dialect:', dialect);
+
+  if (!host || !database || !username || !password) {
+    console.error('❌ ERROR: Missing required database configuration!');
+    console.error('   Please check your .env file in the root directory.');
+  }
+
   return {
-    database: configService.get<string>('DB_NAME'),
+    database,
     host,
-    port: Number(configService.get<string>('DB_PORT')) || 5432,
-    username: configService.get<string>('DB_USERNAME'),
-    password: configService.get<string>('DB_PASSWORD'),
+    port,
+    username,
+    password,
     dialect,
     autoLoadModels: true,
     synchronize: true,
