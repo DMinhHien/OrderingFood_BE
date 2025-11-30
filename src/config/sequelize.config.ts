@@ -8,11 +8,16 @@ export const sequelizeConfig = (
   const dialect = (configService.get<string>('DB_DIALECT') ||
     'postgres') as Dialect;
 
+  const host = configService.get<string>('DB_HOST');
   const useSsl = configService.get<string>('DB_SSL') === 'true';
+
+  // Neon và các cloud PostgreSQL khác yêu cầu SSL
+  // Tự động bật SSL nếu host chứa 'neon.tech' hoặc DB_SSL=true
+  const requiresSsl = useSsl || (host && host.includes('neon.tech'));
 
   return {
     database: configService.get<string>('DB_NAME'),
-    host: configService.get<string>('DB_HOST'),
+    host,
     port: Number(configService.get<string>('DB_PORT')) || 5432,
     username: configService.get<string>('DB_USERNAME'),
     password: configService.get<string>('DB_PASSWORD'),
@@ -24,7 +29,7 @@ export const sequelizeConfig = (
       configService.get<string>('DB_SYNC_ALTER') === 'true'
         ? { alter: true }
         : undefined,
-    dialectOptions: useSsl
+    dialectOptions: requiresSsl
       ? {
           ssl: {
             require: true,
