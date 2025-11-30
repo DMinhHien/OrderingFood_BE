@@ -380,23 +380,44 @@ export class OrderService {
 
         if (finalDiscountId) {
           const discount = await this.discountModel.findByPk(finalDiscountId, {
-            attributes: ['id', 'percent'],
+            attributes: ['id', 'type', 'percent', 'discountmoney'],
           });
           if (discount) {
-            discountPercent =
-              (discount as any).percent ||
-              (discount as any).dataValues?.percent ||
-              (discount as any).getDataValue?.('percent') ||
-              0;
-          }
-        }
+            const discountType =
+              (discount as any).type ||
+              (discount as any).dataValues?.type ||
+              (discount as any).getDataValue?.('type') ||
+              1;
 
-        if (discountPercent > 0) {
-          const discountAmount = (newTotalPrice * discountPercent) / 100;
-          newTotalPrice = newTotalPrice - discountAmount;
-          this.logger.log(
-            `[TOTAL_PRICE] Applied discount: ${discountPercent}%, discount amount: ${discountAmount}, final total: ${newTotalPrice}`,
-          );
+            let discountAmount = 0;
+
+            if (discountType === 1) {
+              // Giảm theo phần trăm
+              discountPercent =
+                (discount as any).percent ||
+                (discount as any).dataValues?.percent ||
+                (discount as any).getDataValue?.('percent') ||
+                0;
+              if (discountPercent > 0) {
+                discountAmount = (newTotalPrice * discountPercent) / 100;
+              }
+            } else if (discountType === 2) {
+              // Giảm theo số tiền cố định
+              const discountMoney =
+                (discount as any).discountmoney ||
+                (discount as any).dataValues?.discountmoney ||
+                (discount as any).getDataValue?.('discountmoney') ||
+                0;
+              discountAmount = Number(discountMoney) || 0;
+            }
+
+            if (discountAmount > 0) {
+              newTotalPrice = newTotalPrice - discountAmount;
+              this.logger.log(
+                `[TOTAL_PRICE] Applied discount type ${discountType}: ${discountType === 1 ? `${discountPercent}%` : `${discountAmount} VND`}, discount amount: ${discountAmount}, final total: ${newTotalPrice}`,
+              );
+            }
+          }
         }
 
         const finalTotalPrice = Math.round(newTotalPrice);

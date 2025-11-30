@@ -13,6 +13,10 @@ export class CreateDiscountDto {
   @IsNotEmpty()
   code: string;
 
+  @IsInt()
+  @IsOptional()
+  type?: number;
+
   @IsString()
   @IsOptional()
   description?: string;
@@ -20,6 +24,10 @@ export class CreateDiscountDto {
   @IsNumber()
   @IsOptional()
   percent?: number;
+
+  @IsNumber()
+  @IsOptional()
+  discountmoney?: number;
 
   @IsInt()
   @IsOptional()

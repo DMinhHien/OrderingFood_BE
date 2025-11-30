@@ -31,6 +31,13 @@ export class Discount extends Model<Discount> {
   code: string;
 
   @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 1,
+  })
+  type: number;
+
+  @Column({
     type: DataType.STRING,
     allowNull: true,
   })
@@ -41,6 +48,12 @@ export class Discount extends Model<Discount> {
     allowNull: true,
   })
   percent: number;
+
+  @Column({
+    type: DataType.DECIMAL(10, 2),
+    allowNull: true,
+  })
+  discountmoney: number;
 
   @Column({
     field: 'minOrderValue',

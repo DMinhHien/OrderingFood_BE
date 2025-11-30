@@ -15,6 +15,7 @@ export class DiscountService {
   async create(createDiscountDto: CreateDiscountDto): Promise<Discount> {
     return this.discountModel.create({
       ...createDiscountDto,
+      type: createDiscountDto.type ?? 1,
       startTime: createDiscountDto.startTime
         ? new Date(createDiscountDto.startTime)
         : undefined,
