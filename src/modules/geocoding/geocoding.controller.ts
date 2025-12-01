@@ -1,6 +1,19 @@
-import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  BadRequestException,
+  Post,
+  Body,
+} from '@nestjs/common';
 import { GeocodingService, GeocodingResult } from './geocoding.service';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiBody,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('geocoding')
 @Controller('geocoding')
@@ -31,5 +44,96 @@ export class GeocodingController {
     }
 
     return this.geocodingService.reverseGeocode(latitude, longitude);
+  }
+
+  @Post('directions')
+  @ApiOperation({ summary: 'Get route from Google Maps Directions API' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        origin: {
+          type: 'object',
+          properties: {
+            latitude: { type: 'number' },
+            longitude: { type: 'number' },
+          },
+        },
+        destination: {
+          type: 'object',
+          properties: {
+            latitude: { type: 'number' },
+            longitude: { type: 'number' },
+          },
+        },
+        waypoints: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              latitude: { type: 'number' },
+              longitude: { type: 'number' },
+            },
+          },
+        },
+      },
+      required: ['origin', 'destination'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Route coordinates',
+    schema: {
+      type: 'object',
+      properties: {
+        polyline: { type: 'string' },
+        coordinates: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              latitude: { type: 'number' },
+              longitude: { type: 'number' },
+            },
+          },
+        },
+      },
+    },
+  })
+  async getDirectionsRoute(
+    @Body()
+    body: {
+      origin: { latitude: number; longitude: number };
+      destination: { latitude: number; longitude: number };
+      waypoints?: Array<{ latitude: number; longitude: number }>;
+    },
+  ) {
+    if (!body.origin || !body.destination) {
+      throw new BadRequestException('Origin và Destination là bắt buộc');
+    }
+
+    if (
+      typeof body.origin.latitude !== 'number' ||
+      typeof body.origin.longitude !== 'number'
+    ) {
+      throw new BadRequestException(
+        'Origin phải có latitude và longitude là số',
+      );
+    }
+
+    if (
+      typeof body.destination.latitude !== 'number' ||
+      typeof body.destination.longitude !== 'number'
+    ) {
+      throw new BadRequestException(
+        'Destination phải có latitude và longitude là số',
+      );
+    }
+
+    return this.geocodingService.getDirectionsRoute(
+      body.origin,
+      body.destination,
+      body.waypoints,
+    );
   }
 }
