@@ -63,6 +63,12 @@ export class RestaurantService {
       include: this.getBaseInclude(),
     });
   }
+  async findAllIncludingInactive(): Promise<Restaurant[]> {
+    return this.restaurantModel.findAll({
+      include: this.getBaseInclude(),
+    });
+  }
+  
 
   async findOne(id: number): Promise<Restaurant> {
     const restaurant = await this.restaurantModel.findOne({
@@ -84,6 +90,20 @@ export class RestaurantService {
     const restaurant = await this.findOne(id);
     await restaurant.update(updateRestaurantDto);
     return restaurant.reload();
+  }
+
+  async updateStatus(id: number, isActive: boolean): Promise<Restaurant> {
+    // Tìm restaurant theo ID (bỏ qua điều kiện isActive: true mặc định)
+    const restaurant = await this.restaurantModel.findOne({
+      where: { id },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    }
+
+    await restaurant.update({ isActive });
+    return restaurant;
   }
 
   async remove(id: number): Promise<void> {

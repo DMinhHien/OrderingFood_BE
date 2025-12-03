@@ -20,6 +20,8 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserStatusDto } from './dto/update-user-status.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -52,6 +54,17 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('all')
+  @ApiOperation({ summary: 'Get all users including inactive ones' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all users (active and inactive)',
+    type: [UserResponseDto],
+  })
+  findAllIncludingInactive() {
+    return this.userService.findAllIncludingInactive();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a user by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })
@@ -62,6 +75,21 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
+  }
+
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Update user status (active/inactive)' })
+  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  @ApiBody({ type: UpdateUserStatusDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User status successfully updated',
+  })
+  updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserStatusDto: UpdateUserStatusDto,
+  ) {
+    return this.userService.updateStatus(id, updateUserStatusDto.isActive);
   }
 
   @Patch(':id')
@@ -84,16 +112,5 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a user (soft delete)' })
-  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
-  @ApiResponse({
-    status: 204,
-    description: 'User successfully deleted',
-  })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.remove(id);
-  }
+
 }

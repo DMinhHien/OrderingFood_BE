@@ -5,9 +5,11 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
+import { plainToInstance } from 'class-transformer';
 import { User } from './user.model';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Injectable()
 export class UserService {
@@ -42,6 +44,23 @@ export class UserService {
           required: false,
         },
       ],
+    });
+  }
+
+  // Get all users including inactive ones
+  async findAllIncludingInactive(): Promise<UserResponseDto[]> {
+    const users = await this.userModel.findAll({
+      include: [
+        'role',
+        {
+          association: 'addresses',
+          required: false,
+        },
+      ],
+    });
+
+    return plainToInstance(UserResponseDto, users.map(user => user.get({ plain: true })), {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -85,8 +104,15 @@ export class UserService {
     return user.reload();
   }
 
-  async remove(id: number): Promise<void> {
-    const user = await this.findOne(id);
-    await user.update({ isActive: false });
+  async updateStatus(id: number, isActive: boolean): Promise<User> {
+    console.log("getting user")
+    const user = await this.userModel.findOne({ where: { id } });
+    console.log("user", user);
+    await user?.update({ isActive });
+    if (user) {
+      return user.reload();
+    } else {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
   }
 }

@@ -21,6 +21,7 @@ import {
 import { RestaurantService } from './restaurant.service';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
+import { UpdateRestaurantStatusDto } from './dto/update-restaurant-status.dto';
 
 @ApiTags('restaurants')
 @Controller('restaurants')
@@ -48,6 +49,16 @@ export class RestaurantController {
   })
   findAll() {
     return this.restaurantService.findAll();
+  }
+
+  @Get('all')
+  @ApiOperation({ summary: 'Get all restaurants including inactive ones' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all restaurants (active and inactive)',
+  })
+  findAllIncludingInactive() {
+    return this.restaurantService.findAllIncludingInactive();
   }
 
   @Get('owner/:userId')
@@ -91,6 +102,24 @@ export class RestaurantController {
   @ApiResponse({ status: 404, description: 'Restaurant not found' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.restaurantService.findOne(id);
+  }
+
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Update restaurant status (active/inactive)' })
+  @ApiParam({ name: 'id', type: Number, description: 'Restaurant ID' })
+  @ApiBody({ type: UpdateRestaurantStatusDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Restaurant status successfully updated',
+  })
+  updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateRestaurantStatusDto: UpdateRestaurantStatusDto,
+  ) {
+    return this.restaurantService.updateStatus(
+      id,
+      updateRestaurantStatusDto.isActive,
+    );
   }
 
   @Patch(':id')
