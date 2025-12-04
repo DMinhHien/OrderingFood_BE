@@ -55,7 +55,8 @@ export class UploadController {
     const host = req.get('host') || 'localhost:5000';
     const baseUrl = `${protocol}://${host}`;
 
-    const fileUrl = await this.uploadService.saveAvatar(file, baseUrl);
+    // Lưu avatar và nhận về đường dẫn tương đối (ví dụ: /uploads/avatars/xxx.jpg)
+    const fileUrl = await this.uploadService.saveAvatar(file);
     return {
       message: 'Upload avatar thành công',
       url: fileUrl,
