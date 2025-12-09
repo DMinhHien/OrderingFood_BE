@@ -93,7 +93,7 @@ export class TransferInformationService {
     if (!isAdmin && !isSeller && item.userId !== currentUserId) {
       throw new ForbiddenException('Bạn không có quyền xóa thông tin này');
     }
-    await item.destroy();
+    await item.update({ isActive: false });
     return { success: true };
   }
 }
