@@ -18,6 +18,7 @@ import {
 import { OrderJourneyService } from './order-journey.service';
 import { CreateOrderJourneyDto } from './dto/create-order-journey.dto';
 import { UpdateOrderJourneyDto } from './dto/update-order-journey.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('order-journeys')
 @Controller('order-journeys')
@@ -25,6 +26,7 @@ export class OrderJourneyController {
   constructor(private readonly service: OrderJourneyService) {}
 
   @Post()
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Create a new order journey' })
   @ApiBody({ type: CreateOrderJourneyDto })
   @ApiResponse({ status: 201, description: 'Order journey created' })
@@ -34,6 +36,7 @@ export class OrderJourneyController {
   }
 
   @Get('order/:orderId')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get journeys by order' })
   @ApiParam({ name: 'orderId', type: Number })
   @ApiResponse({
@@ -45,6 +48,7 @@ export class OrderJourneyController {
   }
 
   @Get(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get a journey by ID' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Order journey found' })
@@ -53,6 +57,7 @@ export class OrderJourneyController {
   }
 
   @Patch(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Update an order journey' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({ type: UpdateOrderJourneyDto })
@@ -65,6 +70,7 @@ export class OrderJourneyController {
   }
 
   @Delete(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Delete an order journey' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 204, description: 'Order journey deleted' })

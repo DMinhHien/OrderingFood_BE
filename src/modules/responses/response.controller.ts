@@ -20,6 +20,7 @@ import {
 import { ResponseService } from './response.service';
 import { CreateResponseDto } from './dto/create-response.dto';
 import { UpdateResponseDto } from './dto/update-response.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('responses')
 @Controller('responses')
@@ -27,6 +28,7 @@ export class ResponseController {
   constructor(private readonly responseService: ResponseService) {}
 
   @Post()
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new response' })
   @ApiResponse({
@@ -40,6 +42,7 @@ export class ResponseController {
   }
 
   @Get()
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get all responses' })
   @ApiResponse({
     status: 200,
@@ -50,6 +53,7 @@ export class ResponseController {
   }
 
   @Get(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get a response by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Response ID' })
   @ApiResponse({
@@ -62,6 +66,7 @@ export class ResponseController {
   }
 
   @Patch(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Update a response' })
   @ApiParam({ name: 'id', type: Number, description: 'Response ID' })
   @ApiBody({ type: UpdateResponseDto })
@@ -78,6 +83,7 @@ export class ResponseController {
   }
 
   @Delete(':id')
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a response (soft delete)' })
   @ApiParam({ name: 'id', type: Number, description: 'Response ID' })

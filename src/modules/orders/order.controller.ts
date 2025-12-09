@@ -11,6 +11,8 @@ import {
   HttpStatus,
   Query,
   UseGuards,
+  Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,6 +28,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -33,9 +36,7 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(1) // Chỉ client (role 1) mới được tạo order
-  @ApiBearerAuth('JWT-auth')
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new order' })
   @ApiResponse({
@@ -51,9 +52,7 @@ export class OrderController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(1, 2) // Client và restaurant owner đều xem được
-  @ApiBearerAuth('JWT-auth')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get all orders' })
   @ApiResponse({
     status: 200,
@@ -65,8 +64,7 @@ export class OrderController {
   }
 
   @Get('user/:userId/orders')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get orders by user' })
   @ApiParam({ name: 'userId', type: Number, description: 'User ID' })
   @ApiResponse({
@@ -74,10 +72,29 @@ export class OrderController {
     description: 'List of orders for the user',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   findByUser(
     @Param('userId', ParseIntPipe) userId: number,
     @Query('status') status?: string,
+    @Request() req?: any,
   ) {
+    // Kiểm tra user chỉ có thể xem orders của chính mình (role 1) hoặc restaurant owner (role 2) có thể xem orders của bất kỳ user nào
+    const currentUser = req?.user;
+    if (currentUser) {
+      const currentUserId = currentUser.id;
+      const currentUserRoleId = currentUser.roleId;
+
+      console.log(
+        `[Order Controller] findByUser - currentUserId: ${currentUserId}, userId: ${userId}, roleId: ${currentUserRoleId}`,
+      );
+
+      // Nếu không phải restaurant owner (role 2) và không phải chính user đó, thì không cho phép
+      if (currentUserRoleId !== 2 && currentUserId !== userId) {
+        throw new ForbiddenException(
+          'Bạn không có quyền xem đơn hàng của người dùng khác',
+        );
+      }
+    }
     const statusNumber = status ? parseInt(status, 10) : undefined;
     return this.orderService.findByUser(
       userId,
@@ -86,9 +103,7 @@ export class OrderController {
   }
 
   @Get('restaurant/:restaurantId/orders')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(2) // Chỉ restaurant owner mới xem được orders của nhà hàng
-  @ApiBearerAuth('JWT-auth')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get orders by restaurant' })
   @ApiParam({
     name: 'restaurantId',
@@ -113,8 +128,7 @@ export class OrderController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get an order by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Order ID' })
   @ApiResponse({
@@ -128,9 +142,7 @@ export class OrderController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(1, 2) // Client và restaurant owner đều có thể update order
-  @ApiBearerAuth('JWT-auth')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Update an order' })
   @ApiParam({ name: 'id', type: Number, description: 'Order ID' })
   @ApiBody({ type: UpdateOrderDto })
@@ -149,9 +161,7 @@ export class OrderController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(1, 2) // Client và restaurant owner đều có thể xóa order
-  @ApiBearerAuth('JWT-auth')
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an order (soft delete)' })
   @ApiParam({ name: 'id', type: Number, description: 'Order ID' })

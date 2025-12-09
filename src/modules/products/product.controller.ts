@@ -35,7 +35,7 @@ export class ProductController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(2) // Chỉ restaurant owner mới được tạo sản phẩm
+  @Roles(2, 3) // Restaurant Owner, Admin
   @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new product' })
@@ -117,7 +117,7 @@ export class ProductController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(2) // Chỉ restaurant owner mới được sửa
+  @Roles(2, 3) // Restaurant Owner, Admin
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update a product' })
   @ApiParam({ name: 'id', type: Number, description: 'Product ID' })
@@ -138,7 +138,7 @@ export class ProductController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(2) // Chỉ restaurant owner mới được xóa
+  @Roles(2, 3) // Restaurant Owner, Admin
   @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a product (soft delete)' })

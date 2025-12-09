@@ -14,6 +14,7 @@ import {
   ApiBody,
   ApiResponse,
 } from '@nestjs/swagger';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('geocoding')
 @Controller('geocoding')
@@ -21,6 +22,7 @@ export class GeocodingController {
   constructor(private readonly geocodingService: GeocodingService) {}
 
   @Get('reverse')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Reverse geocode coordinates to address' })
   @ApiQuery({ name: 'lat', type: Number, description: 'Latitude' })
   @ApiQuery({ name: 'lng', type: Number, description: 'Longitude' })
@@ -47,6 +49,7 @@ export class GeocodingController {
   }
 
   @Post('directions')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get route from Google Maps Directions API' })
   @ApiBody({
     schema: {

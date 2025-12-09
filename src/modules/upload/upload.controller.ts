@@ -4,18 +4,11 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
-  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiConsumes,
-  ApiBody,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('upload')
 @Controller('upload')
@@ -23,8 +16,7 @@ export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @Post('avatar')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Upload avatar image' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({

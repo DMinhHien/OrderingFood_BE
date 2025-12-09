@@ -35,7 +35,7 @@ export class RestaurantController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(2) // Chỉ role 2 (restaurant owner) mới được tạo nhà hàng
+  @Roles(2, 3) // Restaurant Owner, Admin
   @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new restaurant' })
@@ -115,7 +115,7 @@ export class RestaurantController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(2) // Chỉ restaurant owner mới được sửa
+  @Roles(2, 3) // Restaurant Owner, Admin
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update a restaurant' })
   @ApiParam({ name: 'id', type: Number, description: 'Restaurant ID' })
@@ -136,7 +136,7 @@ export class RestaurantController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(2) // Chỉ restaurant owner mới được xóa
+  @Roles(2, 3) // Restaurant Owner, Admin
   @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a restaurant (soft delete)' })

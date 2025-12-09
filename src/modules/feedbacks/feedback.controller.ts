@@ -21,6 +21,7 @@ import {
 import { FeedbackService } from './feedback.service';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('feedbacks')
 @Controller('feedbacks')
@@ -28,6 +29,7 @@ export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
   @Post()
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new feedback' })
   @ApiResponse({
@@ -41,6 +43,7 @@ export class FeedbackController {
   }
 
   @Get()
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get all feedbacks' })
   @ApiResponse({
     status: 200,
@@ -51,6 +54,7 @@ export class FeedbackController {
   }
 
   @Get('order/:orderId')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get feedback by order' })
   @ApiParam({ name: 'orderId', type: Number, description: 'Order ID' })
   @ApiResponse({
@@ -62,6 +66,7 @@ export class FeedbackController {
   }
 
   @Get('restaurant/:restaurantId')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get feedbacks by restaurant with summary' })
   @ApiParam({
     name: 'restaurantId',
@@ -81,6 +86,7 @@ export class FeedbackController {
   }
 
   @Get(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get a feedback by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Feedback ID' })
   @ApiResponse({
@@ -93,6 +99,7 @@ export class FeedbackController {
   }
 
   @Patch(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Update a feedback' })
   @ApiParam({ name: 'id', type: Number, description: 'Feedback ID' })
   @ApiBody({ type: UpdateFeedbackDto })
@@ -109,6 +116,7 @@ export class FeedbackController {
   }
 
   @Delete(':id')
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a feedback (soft delete)' })
   @ApiParam({ name: 'id', type: Number, description: 'Feedback ID' })
