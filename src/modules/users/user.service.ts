@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
+import * as bcrypt from 'bcrypt';
 import { User } from './user.model';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -26,10 +27,21 @@ export class UserService {
       throw new BadRequestException('Email already exists');
     }
 
+    // Hash password nếu có
+    const hashedPassword = createUserDto.password
+      ? await this.hashPassword(createUserDto.password)
+      : createUserDto.password;
+
     return this.userModel.create({
       ...createUserDto,
+      password: hashedPassword,
       isActive: createUserDto.isActive ?? true,
     } as any);
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    const saltRounds = 10;
+    return bcrypt.hash(password, saltRounds);
   }
 
   async findAll(): Promise<User[]> {
@@ -79,6 +91,11 @@ export class UserService {
       if (existingUser) {
         throw new BadRequestException('Email already exists');
       }
+    }
+
+    // Hash password nếu có trong updateUserDto
+    if (updateUserDto.password) {
+      updateUserDto.password = await this.hashPassword(updateUserDto.password);
     }
 
     await user.update(updateUserDto);

@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,10 +18,15 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { RestaurantService } from './restaurant.service';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('restaurants')
 @Controller('restaurants')
@@ -28,6 +34,9 @@ export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(2) // Chỉ role 2 (restaurant owner) mới được tạo nhà hàng
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new restaurant' })
   @ApiResponse({
@@ -35,12 +44,18 @@ export class RestaurantController {
     description: 'Restaurant successfully created',
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Only restaurant owners can create restaurants',
+  })
   @ApiBody({ type: CreateRestaurantDto })
   create(@Body() createRestaurantDto: CreateRestaurantDto) {
     return this.restaurantService.create(createRestaurantDto);
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all restaurants' })
   @ApiResponse({
     status: 200,
@@ -51,17 +66,21 @@ export class RestaurantController {
   }
 
   @Get('owner/:userId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get restaurants owned by a user' })
   @ApiParam({ name: 'userId', type: Number, description: 'Owner user ID' })
   @ApiResponse({
     status: 200,
     description: 'List of restaurants for the given owner',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   findByOwner(@Param('userId', ParseIntPipe) userId: number) {
     return this.restaurantService.findByOwner(userId);
   }
 
   @Get('search')
+  @Public()
   @ApiOperation({ summary: 'Tìm kiếm nhà hàng theo tên và category' })
   @ApiResponse({
     status: 200,
@@ -82,6 +101,7 @@ export class RestaurantController {
   }
 
   @Get(':id')
+  @Public()
   @ApiOperation({ summary: 'Get a restaurant by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Restaurant ID' })
   @ApiResponse({
@@ -94,6 +114,9 @@ export class RestaurantController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(2) // Chỉ restaurant owner mới được sửa
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update a restaurant' })
   @ApiParam({ name: 'id', type: Number, description: 'Restaurant ID' })
   @ApiBody({ type: UpdateRestaurantDto })
@@ -101,6 +124,8 @@ export class RestaurantController {
     status: 200,
     description: 'Restaurant successfully updated',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Restaurant not found' })
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -110,6 +135,9 @@ export class RestaurantController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(2) // Chỉ restaurant owner mới được xóa
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a restaurant (soft delete)' })
   @ApiParam({ name: 'id', type: Number, description: 'Restaurant ID' })
@@ -117,6 +145,8 @@ export class RestaurantController {
     status: 204,
     description: 'Restaurant successfully deleted',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Restaurant not found' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.restaurantService.remove(id);

@@ -4,12 +4,18 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
-  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import type { Request } from 'express';
 import { UploadService } from './upload.service';
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiConsumes,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('upload')
 @Controller('upload')
@@ -17,6 +23,8 @@ export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @Post('avatar')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Upload avatar image' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -31,10 +39,7 @@ export class UploadController {
     },
   })
   @UseInterceptors(FileInterceptor('file'))
-  async uploadAvatar(
-    @UploadedFile() file: Express.Multer.File,
-    @Req() req: Request,
-  ) {
+  async uploadAvatar(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('Không có file được upload');
     }
@@ -49,11 +54,6 @@ export class UploadController {
     if (file.size > maxSize) {
       throw new BadRequestException('Kích thước file không được vượt quá 5MB');
     }
-
-    // Lấy host từ request để tạo URL đúng
-    const protocol = req.protocol || 'http';
-    const host = req.get('host') || 'localhost:5000';
-    const baseUrl = `${protocol}://${host}`;
 
     // Lưu avatar và nhận về đường dẫn tương đối (ví dụ: /uploads/avatars/xxx.jpg)
     const fileUrl = await this.uploadService.saveAvatar(file);
