@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -16,10 +17,14 @@ import {
   ApiParam,
   ApiResponse,
   ApiTags,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CategoryRestaurantMapService } from './category-restaurant-map.service';
 import { CreateCategoryRestaurantMapDto } from './dto/create-category-restaurant-map.dto';
 import { UpdateCategoryRestaurantMapDto } from './dto/update-category-restaurant-map.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('category-restaurant-maps')
 @Controller('category-restaurant-maps')
@@ -29,6 +34,9 @@ export class CategoryRestaurantMapController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Tạo liên kết nhà hàng - danh mục mới' })
   @ApiResponse({ status: 201, description: 'Liên kết tạo thành công' })
@@ -38,6 +46,9 @@ export class CategoryRestaurantMapController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Lấy toàn bộ liên kết nhà hàng - danh mục' })
   @ApiResponse({ status: 200, description: 'Danh sách liên kết' })
   findAll() {
@@ -45,6 +56,9 @@ export class CategoryRestaurantMapController {
   }
 
   @Get('restaurant/:restaurantId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Lấy tất cả liên kết nhà hàng - danh mục theo restaurantId',
   })
@@ -55,6 +69,9 @@ export class CategoryRestaurantMapController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Xem chi tiết một liên kết nhà hàng - danh mục' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Liên kết tìm thấy' })
@@ -63,6 +80,9 @@ export class CategoryRestaurantMapController {
   }
 
   @Patch('restaurant/:restaurantId/category/:categoryId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Cập nhật trạng thái isActive của liên kết nhà hàng - danh mục',
   })
@@ -85,6 +105,9 @@ export class CategoryRestaurantMapController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Cập nhật liên kết nhà hàng - danh mục' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({ type: UpdateCategoryRestaurantMapDto })
@@ -97,6 +120,9 @@ export class CategoryRestaurantMapController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Vô hiệu hóa một liên kết nhà hàng - danh mục' })
   @ApiParam({ name: 'id', type: Number })
