@@ -35,8 +35,16 @@ export class TransferInformationService {
     return this.transferInformationModel.findAll({ include: [User] });
   }
 
-  async findByUser(userId: number, currentUserId: number, isAdmin: boolean) {
-    if (!isAdmin && currentUserId !== userId) {
+  async findByUser(
+    userId: number,
+    currentUserId: number,
+    currentUserRoleId: number,
+  ) {
+    const isAdmin = currentUserRoleId === 3;
+    const isCustomer = currentUserRoleId === 1;
+    // Cho phép Admin hoặc Customer xem thông tin thanh toán của seller
+    // Nếu là role khác (seller), chỉ được xem của chính mình
+    if (!isAdmin && !isCustomer && currentUserId !== userId) {
       throw new ForbiddenException('Bạn không có quyền xem thông tin này');
     }
     return this.transferInformationModel.findAll({
@@ -60,25 +68,29 @@ export class TransferInformationService {
     id: number,
     dto: UpdateTransferInformationDto,
     currentUserId: number,
-    isAdmin: boolean,
+    currentUserRoleId: number,
   ) {
+    const isAdmin = currentUserRoleId === 3;
+    const isSeller = currentUserRoleId === 2;
     const item = await this.transferInformationModel.findByPk(id);
     if (!item) {
       throw new NotFoundException('Không tìm thấy thông tin thanh toán');
     }
-    if (!isAdmin && item.userId !== currentUserId) {
+    if (!isAdmin && !isSeller && item.userId !== currentUserId) {
       throw new ForbiddenException('Bạn không có quyền cập nhật thông tin này');
     }
     await item.update(dto);
     return item;
   }
 
-  async remove(id: number, currentUserId: number, isAdmin: boolean) {
+  async remove(id: number, currentUserId: number, currentUserRoleId: number) {
+    const isAdmin = currentUserRoleId === 3;
+    const isSeller = currentUserRoleId === 2;
     const item = await this.transferInformationModel.findByPk(id);
     if (!item) {
       throw new NotFoundException('Không tìm thấy thông tin thanh toán');
     }
-    if (!isAdmin && item.userId !== currentUserId) {
+    if (!isAdmin && !isSeller && item.userId !== currentUserId) {
       throw new ForbiddenException('Bạn không có quyền xóa thông tin này');
     }
     await item.destroy();

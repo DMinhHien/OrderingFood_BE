@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Payment } from './payment.model';
 import { CreatePaymentDto } from './dto/create-payment.dto';
@@ -58,4 +62,10 @@ export class PaymentService {
     const payment = await this.findOne(id);
     await payment.update({ isActive: false });
   }
+
+  /**
+   * Webhook Zalopay: khi thanh toán thành công, cập nhật payment.status = 2 cho payment mới nhất của order
+   * Giả định payload chứa orderId (hoặc note có số orderId).
+   */
+  // Webhook Zalopay đã được gỡ bỏ theo yêu cầu; giữ comment để tham chiếu nếu cần bật lại trong tương lai.
 }

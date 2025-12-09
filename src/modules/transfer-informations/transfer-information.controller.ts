@@ -49,23 +49,23 @@ export class TransferInformationController {
   }
 
   @Get('user/:userId')
-  @Roles(2, 3)
+  @Roles(1, 2, 3)
   @ApiOperation({ summary: 'Lấy thông tin thanh toán theo user' })
   findByUser(
     @Param('userId', ParseIntPipe) userId: number,
     @Request() req: any,
   ) {
     const currentUserId = Number(req.user?.id);
-    const isAdmin = Number(req.user?.roleId) === 3;
+    const currentUserRoleId = Number(req.user?.roleId);
     return this.transferInformationService.findByUser(
       userId,
       currentUserId,
-      isAdmin,
+      currentUserRoleId,
     );
   }
 
   @Get(':id')
-  @Roles(2, 3)
+  @Roles(1, 2, 3)
   @ApiOperation({ summary: 'Lấy chi tiết thông tin thanh toán' })
   findOne(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
     const currentUserId = Number(req.user?.id);
@@ -83,12 +83,12 @@ export class TransferInformationController {
     @Request() req: any,
   ) {
     const currentUserId = Number(req.user?.id);
-    const isAdmin = Number(req.user?.roleId) === 3;
+    const currentUserRoleId = Number(req.user?.roleId);
     return this.transferInformationService.update(
       id,
       dto,
       currentUserId,
-      isAdmin,
+      currentUserRoleId,
     );
   }
 
@@ -97,7 +97,11 @@ export class TransferInformationController {
   @ApiOperation({ summary: 'Xóa thông tin thanh toán' })
   remove(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
     const currentUserId = Number(req.user?.id);
-    const isAdmin = Number(req.user?.roleId) === 3;
-    return this.transferInformationService.remove(id, currentUserId, isAdmin);
+    const currentUserRoleId = Number(req.user?.roleId);
+    return this.transferInformationService.remove(
+      id,
+      currentUserId,
+      currentUserRoleId,
+    );
   }
 }
