@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   HttpStatus,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,10 +17,14 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('carts')
 @Controller('carts')
@@ -27,6 +32,9 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Tạo giỏ hàng mới cho người dùng' })
   @ApiBody({ type: CreateCartDto })
@@ -35,12 +43,18 @@ export class CartController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Lấy tất cả giỏ hàng đang hoạt động' })
   findAll() {
     return this.cartService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Lấy chi tiết giỏ hàng theo ID' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Giỏ hàng được tìm thấy' })
@@ -50,6 +64,9 @@ export class CartController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Cập nhật thông tin giỏ hàng' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({ type: UpdateCartDto })
@@ -58,6 +75,9 @@ export class CartController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Vô hiệu hóa giỏ hàng' })
   @ApiParam({ name: 'id', type: Number })
@@ -66,6 +86,9 @@ export class CartController {
   }
 
   @Get('user/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Lấy giỏ hàng active của user' })
   @ApiParam({ name: 'userId', type: Number })
   @ApiResponse({ status: 200, description: 'Giỏ hàng được tìm thấy' })
@@ -74,6 +97,9 @@ export class CartController {
   }
 
   @Get('user/:userId/get-or-create')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Lấy hoặc tạo giỏ hàng active của user' })
   @ApiParam({ name: 'userId', type: Number })
   getOrCreateUserCart(@Param('userId', ParseIntPipe) userId: number) {
