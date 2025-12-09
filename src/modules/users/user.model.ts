@@ -20,6 +20,8 @@ import { Response } from '../responses/response.model';
 import { Notification } from '../notifications/notification.model';
 import { Cart } from '../carts/cart.model';
 import { UserAddress } from '../user-addresses/user-address.model';
+import { ComplaintReport } from '../complaints-reports/complaint-report.model';
+import { TransferInformation } from '../transfer-informations/transfer-information.model';
 
 @Table({
   tableName: 'users',
@@ -118,4 +120,10 @@ export class User extends Model<User> {
 
   @HasMany(() => Cart)
   carts: Cart[];
+
+  @HasMany(() => ComplaintReport)
+  complaintReports: ComplaintReport[];
+
+  @HasMany(() => TransferInformation)
+  transferInformations: TransferInformation[];
 }

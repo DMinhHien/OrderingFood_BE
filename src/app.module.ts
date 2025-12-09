@@ -31,6 +31,7 @@ import { GeocodingModule } from './modules/geocoding/geocoding.module';
 import { RestaurantDashboardModule } from './modules/restaurant-dashboard/restaurant-dashboard.module';
 import { OrderJourneyModule } from './modules/order-journeys/order-journey.module';
 import { ComplaintReportModule } from './modules/complaints-reports/complaint-report.module';
+import { TransferInformationModule } from './modules/transfer-informations/transfer-information.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { ComplaintReportModule } from './modules/complaints-reports/complaint-re
     RestaurantDashboardModule,
     OrderJourneyModule,
     ComplaintReportModule,
+    TransferInformationModule,
   ],
   providers: [DatabaseSyncService],
 })
