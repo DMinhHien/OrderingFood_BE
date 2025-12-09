@@ -42,6 +42,7 @@ export class RestaurantDashboardService {
           },
         },
         attributes: ['id', 'userId', 'createdAt'],
+        raw: true,
       }),
       this.orderModel.findAll({
         where: {
@@ -51,6 +52,7 @@ export class RestaurantDashboardService {
           },
         },
         attributes: ['id', 'userId', 'createdAt'],
+        raw: true,
       }),
       this.orderModel.sum('totalPrice', {
         where: {
@@ -99,7 +101,9 @@ export class RestaurantDashboardService {
 
     // Debug log
     console.log(
-      `[Dashboard] ordersToday=${ordersToday.length} customersToday=${customersToday}`,
+      `[Dashboard] ordersToday=${ordersToday.length} customersToday=${customersToday} userIdsToday=${ordersToday
+        .map((o) => o.userId)
+        .join(',')}`,
     );
 
     const currentRating = Number(restaurant?.rating ?? 0);
