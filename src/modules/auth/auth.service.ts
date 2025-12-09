@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.model';
 import { LoginDto } from './dto/login.dto';
 
@@ -12,13 +15,14 @@ export class AuthService {
   constructor(
     @InjectModel(User)
     private readonly userModel: typeof User,
+    private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
-  async login(loginDto: LoginDto): Promise<User> {
+  async login(loginDto: LoginDto) {
     const user = await this.userModel.findOne({
       where: {
         email: loginDto.email,
-        password: loginDto.password,
         isActive: true,
       },
       include: ['role', 'addresses'],
@@ -28,7 +32,56 @@ export class AuthService {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
     }
 
-    return user;
+    // Kiểm tra password đã được hash chưa
+    const isPasswordValid = await this.validatePassword(
+      loginDto.password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
+    }
+
+    // Tạo JWT token
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      roleId: user.roleId,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        roleId: user.roleId,
+        phone: user.phone,
+        gender: user.gender,
+        avatar: user.avatar,
+        role: user.role,
+        addresses: user.addresses,
+      },
+    };
+  }
+
+  async validatePassword(
+    plainPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    // Nếu password chưa được hash (plain text), so sánh trực tiếp
+    // Để tương thích với dữ liệu cũ
+    if (
+      !hashedPassword.startsWith('$2b$') &&
+      !hashedPassword.startsWith('$2a$')
+    ) {
+      return plainPassword === hashedPassword;
+    }
+
+    // Nếu đã hash, dùng bcrypt để so sánh
+    return bcrypt.compare(plainPassword, hashedPassword);
   }
 
   async findById(id: number): Promise<User> {
@@ -42,5 +95,10 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    const saltRounds = 10;
+    return bcrypt.hash(password, saltRounds);
   }
 }
