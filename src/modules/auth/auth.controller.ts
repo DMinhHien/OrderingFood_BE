@@ -37,7 +37,7 @@ export class AuthController {
 
   @Get('user/:id')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Lấy thông tin người dùng đang đăng nhập' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Thông tin người dùng' })

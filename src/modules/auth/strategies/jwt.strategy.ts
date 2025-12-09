@@ -31,11 +31,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
     }
 
+    // Đảm bảo roleId được lấy đúng từ database
+    const roleId = user.getDataValue('roleId') || user.roleId;
+
+    console.log(
+      `[JWT Strategy] User ${user.id} - roleId: ${roleId}, type: ${typeof roleId}`,
+    );
+
     return {
       id: user.id,
       email: user.email,
       username: user.username,
-      roleId: user.roleId,
+      roleId: roleId,
       role: user.role,
     };
   }

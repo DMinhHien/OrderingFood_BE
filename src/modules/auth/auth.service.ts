@@ -20,23 +20,62 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
+    // Tìm user theo email (không filter isActive để debug)
+    // Sử dụng raw: false để đảm bảo lấy dữ liệu mới nhất từ DB
     const user = await this.userModel.findOne({
       where: {
         email: loginDto.email,
-        isActive: true,
       },
       include: ['role', 'addresses'],
+      raw: false, // Đảm bảo trả về Model instance, không phải plain object
     });
 
+    // Reload user từ database để đảm bảo dữ liệu mới nhất
+    if (user) {
+      await user.reload();
+    }
+
     if (!user) {
+      console.log(`[Auth] User not found with email: ${loginDto.email}`);
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
     }
 
+    // Lấy giá trị từ database bằng getDataValue() vì Sequelize model có thể không expose trực tiếp
+    const isActiveRaw: any = user.getDataValue('isActive');
+    const passwordFromDb: string | null = user.getDataValue('password');
+
+    console.log(`[Auth] User ${user.id} - isActive raw:`, isActiveRaw);
+    console.log(`[Auth] User ${user.id} - password exists:`, !!passwordFromDb);
+
+    // Kiểm tra isActive (có thể là boolean hoặc number 0/1)
+    let isActive = false;
+
+    if (typeof isActiveRaw === 'boolean') {
+      isActive = isActiveRaw === true;
+    } else if (typeof isActiveRaw === 'number') {
+      isActive = isActiveRaw === 1;
+    } else if (typeof isActiveRaw === 'string') {
+      isActive = isActiveRaw === 'true' || isActiveRaw === '1';
+    }
+
+    if (!isActive) {
+      console.log(`[Auth] User ${user.id} is not active`);
+      throw new UnauthorizedException('Tài khoản của bạn đã bị vô hiệu hóa');
+    }
+
     // Kiểm tra password đã được hash chưa
+    console.log(`[Auth] Validating password for user ${user.id}`);
+    if (passwordFromDb) {
+      console.log(
+        `[Auth] Password from DB (first 10 chars): ${passwordFromDb.substring(0, 10)}...`,
+      );
+    }
     const isPasswordValid = await this.validatePassword(
       loginDto.password,
-      user.password,
+      passwordFromDb,
     );
+
+    console.log(`[Auth] Password validation result: ${isPasswordValid}`);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
@@ -51,16 +90,29 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload);
 
+    // Lấy các giá trị từ database bằng getDataValue() để tránh vấn đề Sequelize model
+    const userId = user.getDataValue('id');
+    const userEmail = user.getDataValue('email');
+    const username = user.getDataValue('username');
+    const roleId = user.getDataValue('roleId');
+    const phone = user.getDataValue('phone');
+    const gender = user.getDataValue('gender');
+    const avatar = user.getDataValue('avatar');
+
+    console.log(
+      `[Auth] Returning user data - roleId: ${roleId}, type: ${typeof roleId}`,
+    );
+
     return {
       accessToken,
       user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        roleId: user.roleId,
-        phone: user.phone,
-        gender: user.gender,
-        avatar: user.avatar,
+        id: userId,
+        email: userEmail,
+        username: username,
+        roleId: roleId,
+        phone: phone ?? undefined,
+        gender: gender ?? undefined,
+        avatar: avatar ?? undefined,
         role: user.role,
         addresses: user.addresses,
       },
@@ -69,19 +121,35 @@ export class AuthService {
 
   async validatePassword(
     plainPassword: string,
-    hashedPassword: string,
+    hashedPassword: string | null | undefined,
   ): Promise<boolean> {
+    // Kiểm tra null/undefined
+    if (!hashedPassword) {
+      console.log('[Auth] Password is null or undefined');
+      return false;
+    }
+
     // Nếu password chưa được hash (plain text), so sánh trực tiếp
     // Để tương thích với dữ liệu cũ
-    if (
-      !hashedPassword.startsWith('$2b$') &&
-      !hashedPassword.startsWith('$2a$')
-    ) {
-      return plainPassword === hashedPassword;
+    const isHashed =
+      hashedPassword.startsWith('$2b$') || hashedPassword.startsWith('$2a$');
+
+    if (!isHashed) {
+      // Plain text comparison
+      const isValid = plainPassword === hashedPassword;
+      console.log(`[Auth] Plain text comparison: ${isValid}`);
+      return isValid;
     }
 
     // Nếu đã hash, dùng bcrypt để so sánh
-    return bcrypt.compare(plainPassword, hashedPassword);
+    try {
+      const isValid = await bcrypt.compare(plainPassword, hashedPassword);
+      console.log(`[Auth] Bcrypt comparison: ${isValid}`);
+      return isValid;
+    } catch (error) {
+      console.error('[Auth] Error comparing password with bcrypt:', error);
+      return false;
+    }
   }
 
   async findById(id: number): Promise<User> {
