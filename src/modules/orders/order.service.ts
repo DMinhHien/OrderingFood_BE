@@ -161,6 +161,99 @@ export class OrderService {
     // Extract orderDetails and payment from DTO
     const { orderDetails, payment, ...orderUpdateData } = updateOrderDto;
 
+    // Guard: control status transition based on payment
+    if (orderUpdateData.status && orderUpdateData.status !== order.status) {
+      // Lấy các payment của đơn (không lọc isActive để tránh thiếu dữ liệu)
+      const paymentsDb = await this.paymentModel.findAll({
+        where: { orderId: order.id },
+        order: [['createdAt', 'DESC']],
+      });
+      const paymentsFromOrder = (order as any)?.payments || [];
+
+      const toPlain = (p: any) => {
+        if (!p) return null;
+        const getVal = (key: string) =>
+          typeof p.getDataValue === 'function' ? p.getDataValue(key) : p[key];
+        return {
+          paymentMethod: getVal('paymentMethod'),
+          status: getVal('status'),
+          createdAt: getVal('createdAt') || p.createdAt,
+        };
+      };
+
+      const payments = [...paymentsDb, ...paymentsFromOrder]
+        .map(toPlain)
+        .filter((p) => p);
+
+      const newStatus = orderUpdateData.status;
+
+      const normalizeStatus = (val: any): number => {
+        if (val === true) return 2;
+        if (val === false) return 1;
+        if (typeof val === 'number') return val;
+        if (typeof val === 'string') {
+          const n = Number(val.toString().trim());
+          if (!Number.isNaN(n)) return n;
+          const lower = val.toLowerCase();
+          if (lower.includes('paid')) return 2;
+          if (lower.includes('pending')) return 1;
+        }
+        return 0;
+      };
+
+      // Debug payments
+      this.logger.log(
+        `Order #${id} payments fetched: ${payments.length} -> ${payments
+          .map(
+            (p, idx) =>
+              `[#${idx}] method=${(p as any)?.paymentMethod}, status=${(p as any)?.status}`,
+          )
+          .join('; ')}`,
+      );
+
+      // Nếu chưa lấy được payment nào, thử dùng payment trong payload (nếu có)
+      if ((!payments || payments.length === 0) && payment) {
+        payments.push({
+          status: payment.status,
+          paymentMethod: (payment as any).paymentMethod,
+          createdAt: new Date(),
+        } as any);
+      }
+
+      if (!payments || payments.length === 0) {
+        throw new NotFoundException(
+          'Đơn hàng chưa có thông tin thanh toán, không thể đổi trạng thái',
+        );
+      }
+
+      // Mặc định chỉ dùng payment mới nhất (để đảm bảo 1 order-1 payment)
+      const latestPayment = payments[0];
+      const latestStatus = normalizeStatus((latestPayment as any)?.status);
+      const hasPaid =
+        payments.some((p) => normalizeStatus((p as any)?.status) === 2) ||
+        latestStatus === 2;
+      const method = latestPayment?.paymentMethod
+        ? String(latestPayment.paymentMethod).toUpperCase().trim()
+        : '';
+      const isCOD = method === 'COD' || method === 'CASH';
+
+      // Nếu payment không phải COD: chỉ cho phép đổi sang 2/3/4 khi isPaid
+      if (!isCOD) {
+        if ([2, 3, 4].includes(newStatus) && !hasPaid) {
+          throw new NotFoundException(
+            'Thanh toán chưa hoàn tất, không thể chuyển trạng thái đơn hàng',
+          );
+        }
+      } else {
+        // COD: chỉ cho phép chuyển sang 4 (hoàn thành) khi isPaid
+        if (newStatus === 4 && !hasPaid) {
+          throw new NotFoundException(
+            'COD chưa thanh toán, không thể hoàn thành đơn hàng',
+          );
+        }
+      }
+    }
+
     // Update order fields (note, addressId, discountId, status, etc.)
     await order.update(orderUpdateData);
 

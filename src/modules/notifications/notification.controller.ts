@@ -20,6 +20,7 @@ import {
 import { NotificationService } from './notification.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('notifications')
 @Controller('notifications')
@@ -27,6 +28,7 @@ export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   @Post()
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new notification' })
   @ApiResponse({
@@ -40,6 +42,7 @@ export class NotificationController {
   }
 
   @Get()
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get all notifications' })
   @ApiResponse({
     status: 200,
@@ -50,6 +53,7 @@ export class NotificationController {
   }
 
   @Get('receiver/:receivedId')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get notifications by receiver' })
   @ApiParam({ name: 'receivedId', type: Number, description: 'Receiver ID' })
   @ApiResponse({
@@ -61,6 +65,7 @@ export class NotificationController {
   }
 
   @Get(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get a notification by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Notification ID' })
   @ApiResponse({
@@ -73,6 +78,7 @@ export class NotificationController {
   }
 
   @Patch(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Update a notification' })
   @ApiParam({ name: 'id', type: Number, description: 'Notification ID' })
   @ApiBody({ type: UpdateNotificationDto })
@@ -89,6 +95,7 @@ export class NotificationController {
   }
 
   @Patch(':id/read')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Mark a notification as read' })
   @ApiParam({ name: 'id', type: Number, description: 'Notification ID' })
   @ApiResponse({
@@ -100,6 +107,7 @@ export class NotificationController {
   }
 
   @Delete(':id')
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a notification (soft delete)' })
   @ApiParam({ name: 'id', type: Number, description: 'Notification ID' })

@@ -20,6 +20,7 @@ import {
 import { ComplaintReportService } from './complaint-report.service';
 import { CreateComplaintReportDto } from './dto/create-complaint-report.dto';
 import { UpdateComplaintReportDto } from './dto/update-complaint-report.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('complaints-reports')
 @Controller('complaints-reports')
@@ -29,6 +30,7 @@ export class ComplaintReportController {
   ) {}
 
   @Post()
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new complaint report' })
   @ApiResponse({
@@ -42,6 +44,7 @@ export class ComplaintReportController {
   }
 
   @Get()
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get all complaint reports' })
   @ApiResponse({
     status: 200,
@@ -52,6 +55,7 @@ export class ComplaintReportController {
   }
 
   @Get('user/:userId')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get complaint reports by user' })
   @ApiParam({ name: 'userId', type: Number, description: 'User ID' })
   @ApiResponse({
@@ -63,6 +67,7 @@ export class ComplaintReportController {
   }
 
   @Get(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get a complaint report by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Complaint Report ID' })
   @ApiResponse({
@@ -75,6 +80,7 @@ export class ComplaintReportController {
   }
 
   @Patch(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Update a complaint report' })
   @ApiParam({ name: 'id', type: Number, description: 'Complaint Report ID' })
   @ApiBody({ type: UpdateComplaintReportDto })
@@ -91,6 +97,7 @@ export class ComplaintReportController {
   }
 
   @Patch(':id/read')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Mark a complaint report as read' })
   @ApiParam({ name: 'id', type: Number, description: 'Complaint Report ID' })
   @ApiResponse({
@@ -103,6 +110,7 @@ export class ComplaintReportController {
   }
 
   @Delete(':id')
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a complaint report (soft delete)' })
   @ApiParam({ name: 'id', type: Number, description: 'Complaint Report ID' })

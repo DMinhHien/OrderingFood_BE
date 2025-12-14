@@ -31,6 +31,7 @@ import { GeocodingModule } from './modules/geocoding/geocoding.module';
 import { RestaurantDashboardModule } from './modules/restaurant-dashboard/restaurant-dashboard.module';
 import { OrderJourneyModule } from './modules/order-journeys/order-journey.module';
 import { ComplaintReportModule } from './modules/complaints-reports/complaint-report.module';
+import { TransferInformationModule } from './modules/transfer-informations/transfer-information.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 
 @Module({
@@ -71,6 +72,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
     RestaurantDashboardModule,
     OrderJourneyModule,
     ComplaintReportModule,
+    TransferInformationModule,
     StatisticsModule,
   ],
   providers: [DatabaseSyncService],

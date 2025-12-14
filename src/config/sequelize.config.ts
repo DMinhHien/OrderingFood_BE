@@ -54,7 +54,21 @@ export const sequelizeConfig = (
             require: true,
             rejectUnauthorized: false,
           },
+          keepAlive: true,
         }
-      : undefined,
+      : {
+          keepAlive: true,
+        },
+    // Connection pool settings cho Neon và các cloud databases
+    pool: {
+      max: 10,
+      min: 1,
+      acquire: 30000,
+      idle: 10000,
+    },
+    // Retry logic cho connection
+    retry: {
+      max: 3,
+    },
   };
 };

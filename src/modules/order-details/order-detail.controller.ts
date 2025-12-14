@@ -20,6 +20,7 @@ import {
 import { OrderDetailService } from './order-detail.service';
 import { CreateOrderDetailDto } from './dto/create-order-detail.dto';
 import { UpdateOrderDetailDto } from './dto/update-order-detail.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('order-details')
 @Controller('order-details')
@@ -27,6 +28,7 @@ export class OrderDetailController {
   constructor(private readonly orderDetailService: OrderDetailService) {}
 
   @Post()
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new order detail' })
   @ApiResponse({
@@ -40,6 +42,7 @@ export class OrderDetailController {
   }
 
   @Get()
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get all order details' })
   @ApiResponse({
     status: 200,
@@ -50,6 +53,7 @@ export class OrderDetailController {
   }
 
   @Get(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get an order detail by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Order detail ID' })
   @ApiResponse({
@@ -62,6 +66,7 @@ export class OrderDetailController {
   }
 
   @Patch(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Update an order detail' })
   @ApiParam({ name: 'id', type: Number, description: 'Order detail ID' })
   @ApiBody({ type: UpdateOrderDetailDto })
@@ -78,6 +83,7 @@ export class OrderDetailController {
   }
 
   @Delete(':id')
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an order detail (soft delete)' })
   @ApiParam({ name: 'id', type: Number, description: 'Order detail ID' })

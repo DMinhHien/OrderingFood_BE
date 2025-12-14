@@ -23,7 +23,7 @@ export class RestaurantDashboardService {
 
     const baseOrderWhere = {
       restaurantId,
-      isActive: true,
+      [Op.or]: [{ isActive: true }, { isActive: null }],
     };
 
     const [
@@ -41,7 +41,8 @@ export class RestaurantDashboardService {
             [Op.between]: [todayRange.start, todayRange.end],
           },
         },
-        attributes: ['id', 'userId'],
+        attributes: ['id', 'userId', 'createdAt'],
+        raw: true,
       }),
       this.orderModel.findAll({
         where: {
@@ -50,7 +51,8 @@ export class RestaurantDashboardService {
             [Op.between]: [yesterdayRange.start, yesterdayRange.end],
           },
         },
-        attributes: ['id', 'userId'],
+        attributes: ['id', 'userId', 'createdAt'],
+        raw: true,
       }),
       this.orderModel.sum('totalPrice', {
         where: {
@@ -93,8 +95,16 @@ export class RestaurantDashboardService {
     const revenueToday = Number(revenueTodayRaw || 0);
     const revenueYesterday = Number(revenueYesterdayRaw || 0);
 
+    // Số khách đặt hôm nay
     const customersToday = this.countUniqueCustomers(ordersToday);
     const customersYesterday = this.countUniqueCustomers(ordersYesterday);
+
+    // Debug log
+    console.log(
+      `[Dashboard] ordersToday=${ordersToday.length} customersToday=${customersToday} userIdsToday=${ordersToday
+        .map((o) => o.userId)
+        .join(',')}`,
+    );
 
     const currentRating = Number(restaurant?.rating ?? 0);
     const previousRating =
@@ -133,10 +143,18 @@ export class RestaurantDashboardService {
     };
   }
 
-  private countUniqueCustomers(orders: { userId?: number | null }[]) {
+  private countUniqueCustomers(orders: { userId?: number | string | null }[]) {
     const customerSet = new Set(
       orders
-        .map((order) => order.userId)
+        .map((order) => {
+          const val = order.userId;
+          if (typeof val === 'number') return val;
+          if (typeof val === 'string') {
+            const n = Number(val);
+            return Number.isNaN(n) ? null : n;
+          }
+          return null;
+        })
         .filter((id): id is number => typeof id === 'number'),
     );
     return customerSet.size;
@@ -155,21 +173,16 @@ export class RestaurantDashboardService {
   }
 
   private getDayRange(date: Date) {
-    const start = this.startOfDay(date);
-    const end = this.endOfDay(date);
+    // Mặc định dùng UTC+7 (VN), không cần biến môi trường
+    const offsetMinutes = 420;
+    const baseUtc = Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+    );
+    const start = new Date(baseUtc - offsetMinutes * 60 * 1000);
+    const end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
     return { start, end };
-  }
-
-  private startOfDay(date: Date) {
-    const result = new Date(date);
-    result.setHours(0, 0, 0, 0);
-    return result;
-  }
-
-  private endOfDay(date: Date) {
-    const result = new Date(date);
-    result.setHours(23, 59, 59, 999);
-    return result;
   }
 
   private addDays(date: Date, days: number) {

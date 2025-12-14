@@ -2,13 +2,13 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Patch,
   Param,
   Delete,
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Body,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,6 +20,7 @@ import {
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('payments')
 @Controller('payments')
@@ -27,6 +28,7 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post()
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new payment' })
   @ApiResponse({
@@ -40,6 +42,7 @@ export class PaymentController {
   }
 
   @Get()
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get all payments' })
   @ApiResponse({
     status: 200,
@@ -50,6 +53,7 @@ export class PaymentController {
   }
 
   @Get('order/:orderId')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get payments by order ID' })
   @ApiParam({ name: 'orderId', type: Number, description: 'Order ID' })
   @ApiResponse({
@@ -61,6 +65,7 @@ export class PaymentController {
   }
 
   @Get(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get a payment by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Payment ID' })
   @ApiResponse({
@@ -73,6 +78,7 @@ export class PaymentController {
   }
 
   @Patch(':id')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Update a payment' })
   @ApiParam({ name: 'id', type: Number, description: 'Payment ID' })
   @ApiBody({ type: UpdatePaymentDto })
@@ -89,6 +95,7 @@ export class PaymentController {
   }
 
   @Delete(':id')
+  @Public() // Mọi role đều truy cập được
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a payment (soft delete)' })
   @ApiParam({ name: 'id', type: Number, description: 'Payment ID' })

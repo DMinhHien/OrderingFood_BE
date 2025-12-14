@@ -27,6 +27,7 @@ const common = {
   },
   dialectOptions: {
     useUTC: false,
+    keepAlive: true,
     // Thêm cấu hình SSL nếu cần
     ...(requiresSsl && {
       ssl: {
@@ -40,7 +41,13 @@ const common = {
 };
 
 module.exports = {
-  development: { ...common },
-  test: { ...common },
-  production: { ...common },
+  development: {
+    ...common,
+    pool: { max: 10, min: 1, acquire: 30000, idle: 10000 },
+  },
+  test: { ...common, pool: { max: 5, min: 1, acquire: 30000, idle: 10000 } },
+  production: {
+    ...common,
+    pool: { max: 10, min: 1, acquire: 30000, idle: 10000 },
+  },
 };

@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,10 +17,14 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('addresses')
 @Controller('addresses')
@@ -27,6 +32,9 @@ export class AddressController {
   constructor(private readonly addressService: AddressService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new address' })
   @ApiResponse({
@@ -40,6 +48,9 @@ export class AddressController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get all addresses' })
   @ApiResponse({
     status: 200,
@@ -50,6 +61,9 @@ export class AddressController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get an address by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'Address ID' })
   @ApiResponse({
@@ -62,6 +76,9 @@ export class AddressController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update an address' })
   @ApiParam({ name: 'id', type: Number, description: 'Address ID' })
   @ApiBody({ type: UpdateAddressDto })
@@ -78,6 +95,9 @@ export class AddressController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(1, 2, 3) // Client, Restaurant Owner, Admin
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an address (soft delete)' })
   @ApiParam({ name: 'id', type: Number, description: 'Address ID' })

@@ -1,6 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { RevenuePeriod, RevenueReportService } from './revenue-report.service';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('revenue-reports')
 @Controller('revenue-reports')
@@ -8,6 +9,7 @@ export class RevenueReportController {
   constructor(private readonly revenueReportService: RevenueReportService) {}
 
   @Get('restaurant/:restaurantId/summary')
+  @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get revenue summary for a restaurant' })
   @ApiParam({
     name: 'restaurantId',
