@@ -373,4 +373,49 @@ export class RevenueReportService {
     result.setDate(result.getDate() + days);
     return result;
   }
+
+  /**
+   * Lấy doanh thu theo tháng trong năm cho một nhà hàng
+   * @param restaurantId ID của nhà hàng
+   * @param year Năm cần lấy doanh thu
+   * @returns Mảng 12 phần tử, mỗi phần tử chứa tháng (1-12) và doanh thu của tháng đó
+   */
+  async getMonthlyRevenueByYear(
+    restaurantId: number,
+    year: number,
+  ): Promise<Array<{ month: number; revenue: number }>> {
+    // Tính khoảng thời gian từ đầu năm đến cuối năm
+    const yearStart = new Date(year, 0, 1); // Tháng 1, ngày 1
+    const yearEnd = new Date(year, 11, 31, 23, 59, 59, 999); // Tháng 12, ngày 31
+
+    // Lấy tất cả các đơn hàng đã hoàn thành trong năm
+    const orders = await this.orderModel.findAll({
+      where: {
+        restaurantId,
+        isActive: true,
+        status: 4, // Đơn hàng đã hoàn thành
+        createdAt: {
+          [Op.between]: [yearStart, yearEnd],
+        },
+      },
+      attributes: ['id', 'totalPrice', 'createdAt'],
+      raw: true,
+    });
+
+    // Khởi tạo mảng 12 tháng với doanh thu = 0
+    const monthlyRevenue = Array.from({ length: 12 }, (_, index) => ({
+      month: index + 1,
+      revenue: 0,
+    }));
+
+    // Tính tổng doanh thu cho mỗi tháng
+    orders.forEach((order: any) => {
+      const orderDate = new Date(order.createdAt);
+      const month = orderDate.getMonth(); // 0-11
+      const revenue = Number(order.totalPrice || 0);
+      monthlyRevenue[month].revenue += revenue;
+    });
+
+    return monthlyRevenue;
+  }
 }

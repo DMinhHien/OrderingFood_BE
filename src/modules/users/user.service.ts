@@ -132,4 +132,13 @@ export class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
+
+  async remove(id: number): Promise<void> {
+    const user = await this.userModel.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    // Soft delete: set isActive to false
+    await user.update({ isActive: false });
+  }
 }

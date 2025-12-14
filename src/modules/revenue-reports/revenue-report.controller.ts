@@ -33,4 +33,51 @@ export class RevenueReportController {
       normalizedPeriod,
     );
   }
+
+  @Get('restaurant/:restaurantId/monthly/:year')
+  @Public() // Mọi role đều truy cập được
+  @ApiOperation({
+    summary: 'Get monthly revenue for a restaurant by year',
+    description:
+      'Trả về mảng 12 phần tử, mỗi phần tử chứa tháng (1-12) và doanh thu của tháng đó trong năm được chỉ định',
+  })
+  @ApiParam({
+    name: 'restaurantId',
+    type: Number,
+    description: 'Restaurant ID',
+  })
+  @ApiParam({
+    name: 'year',
+    type: Number,
+    description: 'Năm cần lấy doanh thu (ví dụ: 2024)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Mảng doanh thu theo tháng trong năm',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          month: { type: 'number', description: 'Tháng (1-12)' },
+          revenue: { type: 'number', description: 'Doanh thu của tháng' },
+        },
+      },
+      example: [
+        { month: 1, revenue: 5000000 },
+        { month: 2, revenue: 6000000 },
+        { month: 3, revenue: 4500000 },
+        // ... các tháng còn lại
+      ],
+    },
+  })
+  getMonthlyRevenueByYear(
+    @Param('restaurantId', ParseIntPipe) restaurantId: number,
+    @Param('year', ParseIntPipe) year: number,
+  ) {
+    return this.revenueReportService.getMonthlyRevenueByYear(
+      restaurantId,
+      year,
+    );
+  }
 }
