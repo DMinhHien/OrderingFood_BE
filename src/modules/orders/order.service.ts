@@ -29,8 +29,103 @@ export class OrderService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
+    // Nếu có discount, kiểm tra và tính toán lại totalPrice và shippingFee
+    let finalTotalPrice = createOrderDto.totalPrice;
+    let finalShippingFee = createOrderDto.shippingFee;
+
+    if (createOrderDto.discountId) {
+      const discount = await this.discountModel.findByPk(
+        createOrderDto.discountId,
+        {
+          attributes: [
+            'id',
+            'type',
+            'percent',
+            'discountmoney',
+            'minOrderValue',
+            'startTime',
+            'endTime',
+            'status',
+            'quantity',
+          ],
+        },
+      );
+
+      if (discount) {
+        const discountType =
+          (discount as any).type ||
+          (discount as any).dataValues?.type ||
+          (discount as any).getDataValue?.('type') ||
+          1;
+
+        const minOrderValue =
+          (discount as any).minOrderValue ||
+          (discount as any).dataValues?.minOrderValue ||
+          (discount as any).getDataValue?.('minOrderValue') ||
+          0;
+
+        // Kiểm tra minOrderValue
+        if (createOrderDto.totalPrice >= minOrderValue) {
+          // Kiểm tra thời gian áp dụng
+          const now = new Date();
+          const startTime = (discount as any).startTime
+            ? new Date((discount as any).startTime)
+            : null;
+          const endTime = (discount as any).endTime
+            ? new Date((discount as any).endTime)
+            : null;
+
+          const isTimeValid =
+            (!startTime || now >= startTime) && (!endTime || now <= endTime);
+
+          if (isTimeValid) {
+            let discountAmount = 0;
+
+            if (discountType === 1) {
+              // Giảm theo phần trăm
+              const percent =
+                (discount as any).percent ||
+                (discount as any).dataValues?.percent ||
+                (discount as any).getDataValue?.('percent') ||
+                0;
+              if (percent > 0) {
+                discountAmount = Math.floor(
+                  (createOrderDto.totalPrice * percent) / 100,
+                );
+              }
+            } else if (discountType === 2) {
+              // Giảm theo số tiền cố định
+              const discountMoney =
+                (discount as any).discountmoney ||
+                (discount as any).dataValues?.discountmoney ||
+                (discount as any).getDataValue?.('discountmoney') ||
+                0;
+              discountAmount = Number(discountMoney) || 0;
+            } else if (discountType === 3) {
+              // Free ship - không giảm tiền, chỉ set shippingFee = 0
+              discountAmount = 0;
+              finalShippingFee = 0;
+            }
+
+            if (discountAmount > 0) {
+              finalTotalPrice = createOrderDto.totalPrice - discountAmount;
+              this.logger.log(
+                `[CREATE_ORDER] Applied discount type ${discountType}: ${discountType === 1 ? `${(discount as any).percent || 0}%` : `${discountAmount} VND`}, discount amount: ${discountAmount}, final total: ${finalTotalPrice}`,
+              );
+            } else if (discountType === 3) {
+              this.logger.log(
+                `[CREATE_ORDER] Applied free ship discount, shippingFee set to 0`,
+              );
+            }
+          }
+        }
+      }
+    }
+
     return this.orderModel.create({
       ...createOrderDto,
+      totalPrice: finalTotalPrice,
+      shippingFee: finalShippingFee,
       isActive: createOrderDto.isActive ?? true,
     } as any);
   }
@@ -473,7 +568,15 @@ export class OrderService {
 
         if (finalDiscountId) {
           const discount = await this.discountModel.findByPk(finalDiscountId, {
-            attributes: ['id', 'type', 'percent', 'discountmoney'],
+            attributes: [
+              'id',
+              'type',
+              'percent',
+              'discountmoney',
+              'minOrderValue',
+              'startTime',
+              'endTime',
+            ],
           });
           if (discount) {
             const discountType =
@@ -482,33 +585,67 @@ export class OrderService {
               (discount as any).getDataValue?.('type') ||
               1;
 
-            let discountAmount = 0;
+            const minOrderValue =
+              (discount as any).minOrderValue ||
+              (discount as any).dataValues?.minOrderValue ||
+              (discount as any).getDataValue?.('minOrderValue') ||
+              0;
 
-            if (discountType === 1) {
-              // Giảm theo phần trăm
-              discountPercent =
-                (discount as any).percent ||
-                (discount as any).dataValues?.percent ||
-                (discount as any).getDataValue?.('percent') ||
-                0;
-              if (discountPercent > 0) {
-                discountAmount = (newTotalPrice * discountPercent) / 100;
+            // Kiểm tra minOrderValue
+            if (newTotalPrice >= minOrderValue) {
+              // Kiểm tra thời gian áp dụng
+              const now = new Date();
+              const startTime = (discount as any).startTime
+                ? new Date((discount as any).startTime)
+                : null;
+              const endTime = (discount as any).endTime
+                ? new Date((discount as any).endTime)
+                : null;
+
+              const isTimeValid =
+                (!startTime || now >= startTime) &&
+                (!endTime || now <= endTime);
+
+              if (isTimeValid) {
+                let discountAmount = 0;
+
+                if (discountType === 1) {
+                  // Giảm theo phần trăm
+                  discountPercent =
+                    (discount as any).percent ||
+                    (discount as any).dataValues?.percent ||
+                    (discount as any).getDataValue?.('percent') ||
+                    0;
+                  if (discountPercent > 0) {
+                    discountAmount = Math.floor(
+                      (newTotalPrice * discountPercent) / 100,
+                    );
+                  }
+                } else if (discountType === 2) {
+                  // Giảm theo số tiền cố định
+                  const discountMoney =
+                    (discount as any).discountmoney ||
+                    (discount as any).dataValues?.discountmoney ||
+                    (discount as any).getDataValue?.('discountmoney') ||
+                    0;
+                  discountAmount = Number(discountMoney) || 0;
+                } else if (discountType === 3) {
+                  // Free ship - không giảm tiền, chỉ set shippingFee = 0
+                  discountAmount = 0;
+                  // Cập nhật shippingFee trong orderUpdateData
+                  orderUpdateData.shippingFee = 0;
+                  this.logger.log(
+                    `[TOTAL_PRICE] Applied free ship discount, shippingFee set to 0`,
+                  );
+                }
+
+                if (discountAmount > 0) {
+                  newTotalPrice = newTotalPrice - discountAmount;
+                  this.logger.log(
+                    `[TOTAL_PRICE] Applied discount type ${discountType}: ${discountType === 1 ? `${discountPercent}%` : `${discountAmount} VND`}, discount amount: ${discountAmount}, final total: ${newTotalPrice}`,
+                  );
+                }
               }
-            } else if (discountType === 2) {
-              // Giảm theo số tiền cố định
-              const discountMoney =
-                (discount as any).discountmoney ||
-                (discount as any).dataValues?.discountmoney ||
-                (discount as any).getDataValue?.('discountmoney') ||
-                0;
-              discountAmount = Number(discountMoney) || 0;
-            }
-
-            if (discountAmount > 0) {
-              newTotalPrice = newTotalPrice - discountAmount;
-              this.logger.log(
-                `[TOTAL_PRICE] Applied discount type ${discountType}: ${discountType === 1 ? `${discountPercent}%` : `${discountAmount} VND`}, discount amount: ${discountAmount}, final total: ${newTotalPrice}`,
-              );
             }
           }
         }
