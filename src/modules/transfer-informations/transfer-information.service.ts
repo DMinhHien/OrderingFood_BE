@@ -42,13 +42,27 @@ export class TransferInformationService {
   ) {
     const isAdmin = currentUserRoleId === 3;
     const isCustomer = currentUserRoleId === 1;
+    const isSeller = currentUserRoleId === 2;
     // Cho phép Admin hoặc Customer xem thông tin thanh toán của seller
     // Nếu là role khác (seller), chỉ được xem của chính mình
     if (!isAdmin && !isCustomer && currentUserId !== userId) {
       throw new ForbiddenException('Bạn không có quyền xem thông tin này');
     }
+
+    // Xây dựng điều kiện where
+    const whereCondition: any = { userId };
+
+    // Nếu là customer xem transfer-information của seller: chỉ hiển thị những cái có isActive = true
+    // Nếu là seller xem của chính mình: hiển thị tất cả (để quản lý)
+    // Nếu là admin: hiển thị tất cả
+    if (isCustomer && currentUserId !== userId) {
+      // Customer đang xem transfer-information của seller khác
+      whereCondition.isActive = true;
+    }
+    // Nếu là seller xem của chính mình hoặc admin: không thêm điều kiện isActive
+
     return this.transferInformationModel.findAll({
-      where: { userId },
+      where: whereCondition,
       order: [['createdAt', 'DESC']],
     });
   }
