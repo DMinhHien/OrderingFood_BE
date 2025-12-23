@@ -49,6 +49,14 @@ export class DiscountService {
     });
   }
 
+  // Dành cho admin: trả về tất cả discount (không lọc status/thời gian), vẫn tôn trọng isActive
+  async findAllAdmin(): Promise<Discount[]> {
+    return this.discountModel.findAll({
+      where: { isActive: true },
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
   async findOne(id: number): Promise<Discount> {
     const discount = await this.discountModel.findOne({
       where: { id, isActive: true },

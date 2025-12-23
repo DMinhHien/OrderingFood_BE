@@ -60,6 +60,21 @@ export class DiscountController {
     return this.discountService.findAll();
   }
 
+  @Get('all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(3) // Admin
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Get all discounts for admin (no status/time filter)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all discounts for admin',
+  })
+  findAllAdmin() {
+    return this.discountService.findAllAdmin();
+  }
+
   @Get(':id')
   @Public() // Mọi role đều truy cập được
   @ApiOperation({ summary: 'Get a discount by ID' })
