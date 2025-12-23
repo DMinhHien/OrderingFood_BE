@@ -249,6 +249,20 @@ export class OrderService {
     const order = await this.findOne(id);
     const previousStatus = order.status;
 
+    const normalizeStatus = (val: any): number => {
+      if (val === true) return 2;
+      if (val === false) return 1;
+      if (typeof val === 'number') return val;
+      if (typeof val === 'string') {
+        const n = Number(val.toString().trim());
+        if (!Number.isNaN(n)) return n;
+        const lower = val.toLowerCase();
+        if (lower.includes('paid')) return 2;
+        if (lower.includes('pending')) return 1;
+      }
+      return 0;
+    };
+
     this.logger.log(
       `Updating order #${id} - has orderDetails: ${!!updateOrderDto.orderDetails}, has payment: ${!!updateOrderDto.payment}`,
     );
@@ -281,20 +295,6 @@ export class OrderService {
         .filter((p) => p);
 
       const newStatus = orderUpdateData.status;
-
-      const normalizeStatus = (val: any): number => {
-        if (val === true) return 2;
-        if (val === false) return 1;
-        if (typeof val === 'number') return val;
-        if (typeof val === 'string') {
-          const n = Number(val.toString().trim());
-          if (!Number.isNaN(n)) return n;
-          const lower = val.toLowerCase();
-          if (lower.includes('paid')) return 2;
-          if (lower.includes('pending')) return 1;
-        }
-        return 0;
-      };
 
       // Debug payments
       this.logger.log(
@@ -680,6 +680,53 @@ export class OrderService {
       this.logger.log(
         `[TOTAL_PRICE] Skipping totalPrice recalculation for order #${id}: no orderDetails in DTO`,
       );
+    }
+
+    // Nếu đơn hàng chuyển sang trạng thái hoàn thành (status = 4) và có discount, giảm quantity của discount đi 1
+    const previousStatusNormalized = normalizeStatus(previousStatus);
+    const nextStatus =
+      updateOrderDto.status !== undefined
+        ? normalizeStatus(updateOrderDto.status)
+        : normalizeStatus(order.status);
+    this.logger.log(
+      `[DISCOUNT] Status transition check for order #${id} -> previous: ${previousStatusNormalized}, next: ${nextStatus}, dto.status: ${updateOrderDto.status}, persisted status: ${order.status}`,
+    );
+    if (previousStatusNormalized !== 4 && nextStatus === 4) {
+      const discountIdFromOrder =
+        (order as any).discountId ??
+        (order as any).discount_id ??
+        (order as any).getDataValue?.('discountId') ??
+        (order as any).discount?.id;
+      const discountIdToUse =
+        updateOrderDto.discountId !== undefined
+          ? updateOrderDto.discountId
+          : discountIdFromOrder;
+      this.logger.log(
+        `[DISCOUNT] Completing order #${id}, discount to use: ${discountIdToUse}, fallback from order: ${discountIdFromOrder}`,
+      );
+      if (discountIdToUse) {
+        const discount = await this.discountModel.findByPk(discountIdToUse);
+        if (discount) {
+          const currentQty = Number(
+            (discount as any).quantity ??
+              (discount as any).getDataValue?.('quantity') ??
+              0,
+          );
+          const newQty = currentQty > 0 ? currentQty - 1 : 0;
+          await discount.update({ quantity: newQty });
+          this.logger.log(
+            `[DISCOUNT] Order #${id} completed. Decreased discount #${discountIdToUse} quantity from ${currentQty} to ${newQty}`,
+          );
+        } else {
+          this.logger.warn(
+            `[DISCOUNT] Order #${id} completed but discount #${discountIdToUse} not found`,
+          );
+        }
+      } else {
+        this.logger.log(
+          `[DISCOUNT] Order #${id} completed without discountId to decrement`,
+        );
+      }
     }
 
     const normalizedStatus =
