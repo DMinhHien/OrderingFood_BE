@@ -19,15 +19,17 @@ export class ResponseService {
   }
 
   async findAll(): Promise<Response[]> {
+    // Trả về tất cả (kể cả isActive = false) để admin có thể xem và bật/tắt
     return this.responseModel.findAll({
-      where: { isActive: true },
       include: ['sender', 'feedback'],
+      order: [['createdAt', 'DESC']],
     });
   }
 
   async findOne(id: number): Promise<Response> {
+    // Không lọc isActive để có thể thao tác bật/tắt các response đã khóa
     const response = await this.responseModel.findOne({
-      where: { id, isActive: true },
+      where: { id },
       include: ['sender', 'feedback'],
     });
 

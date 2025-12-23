@@ -27,8 +27,8 @@ export class FeedbackService {
   }
 
   async findAll(): Promise<Feedback[]> {
+    // Trả về tất cả (kể cả isActive = false) để admin có thể xem và bật/tắt
     return this.feedbackModel.findAll({
-      where: { isActive: true },
       include: [
         {
           association: 'order',
@@ -43,8 +43,9 @@ export class FeedbackService {
   }
 
   async findOne(id: number): Promise<Feedback> {
+    // Không lọc isActive để có thể thao tác bật/tắt các feedback đã khóa
     const feedback = await this.feedbackModel.findOne({
-      where: { id, isActive: true },
+      where: { id },
       include: [
         {
           association: 'order',
